@@ -257,13 +257,13 @@
                 <div class="flex items-center justify-between mb-1.5">
                   <label class="text-xs font-semibold text-neutral-700">Item Discount</label>
                   <div class="flex rounded-md bg-neutral-100 p-0.5 text-[10px] font-semibold">
-                    <button id="discountTypeFlat" onclick="setDiscountType('flat')" class="px-2 py-0.5 rounded bg-white text-neutral-900 shadow-xs">&#8377; Flat</button>
+                    <button id="discountTypeFlat" onclick="setDiscountType('flat')" class="px-2 py-0.5 rounded bg-white text-neutral-900 shadow-xs cursor-pointer">鈧� Flat</button>
                     <button id="discountTypePercent" onclick="setDiscountType('percent')" class="px-2 py-0.5 rounded text-neutral-500">Percent %</button>
                   </div>
                 </div>
                 <div class="relative">
                   <input type="number" id="inputItemDiscount" value="0" min="0" oninput="calculateLineItemPreview()" class="w-full px-3 py-2 text-sm font-mono text-neutral-900 rounded-xl border border-neutral-200 focus:ring-2 focus:ring-neutral-900 focus:border-neutral-900 outline-hidden transition" />
-                  <span id="discountTypeUnit" class="absolute right-3 top-2.5 text-xs text-neutral-400 font-mono">&#8377;</span>
+                  <span id="discountTypeUnit" class="absolute right-3 top-2.5 text-xs text-neutral-500 font-mono font-bold">鈧�</span>
                 </div>
               </div>
             </div>
@@ -272,7 +272,7 @@
               <div class="min-w-0">
                 <div class="text-[11px] text-neutral-500 font-medium">Item Subtotal:</div>
                 <div class="flex items-baseline gap-2">
-                  <span id="previewLineTotal" class="text-lg font-bold font-mono text-neutral-900">&#8377;899</span>
+                  <span id="previewLineTotal" class="text-lg font-bold font-mono text-neutral-900">鈧�0</span>
                   <span id="previewDiscountBadge" class="text-[11px] text-emerald-600 font-medium">No discount</span>
                 </div>
               </div>
@@ -329,19 +329,19 @@
             <div class="mt-5 p-4 rounded-xl bg-neutral-50/80 border border-neutral-200/80 space-y-2">
               <div class="flex justify-between text-xs text-neutral-600 font-medium">
                 <span>Sub Total:</span>
-                <span id="billSubtotal" class="font-mono font-semibold text-neutral-900">&#8377;0</span>
+                <span id="billSubtotal" class="font-mono font-semibold text-neutral-900">鈧�0</span>
               </div>
               <div class="flex justify-between text-xs text-emerald-700 font-medium">
                 <span>Total Discount Given:</span>
-                <span id="billTotalDiscount" class="font-mono font-bold">-&#8377;0</span>
+                <span id="billTotalDiscount" class="font-mono font-bold">-鈧�0</span>
               </div>
               <div id="taxRowContainer" class="hidden flex justify-between text-xs text-neutral-600 font-medium">
                 <span id="taxLabelDisplay">GST (18%):</span>
-                <span id="billTaxAmount" class="font-mono font-semibold text-neutral-900">&#8377;0</span>
+                <span id="billTaxAmount" class="font-mono font-semibold text-neutral-900">鈧�0</span>
               </div>
               <div class="pt-2 border-t border-neutral-200 flex justify-between items-baseline">
                 <span class="text-sm font-extrabold uppercase tracking-tight text-neutral-900">Final Total:</span>
-                <span id="billFinalTotal" class="text-xl font-extrabold font-mono text-neutral-950">&#8377;0</span>
+                <span id="billFinalTotal" class="text-xl font-extrabold font-mono text-neutral-950">鈧�0</span>
               </div>
             </div>
 
@@ -367,11 +367,11 @@
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         <div class="bg-white rounded-2xl p-3.5 sm:p-4 border border-neutral-200 shadow-xs min-w-0">
           <div class="text-[11px] sm:text-xs text-neutral-500 font-medium truncate">Total Store Revenue</div>
-          <div id="statTotalRevenue" class="text-lg sm:text-xl font-extrabold font-mono text-neutral-900 mt-1 truncate">&#8377;0</div>
+          <div id="statTotalRevenue" class="text-lg sm:text-xl font-extrabold font-mono text-neutral-900 mt-1 truncate">鈧�0</div>
         </div>
         <div class="bg-white rounded-2xl p-3.5 sm:p-4 border border-neutral-200 shadow-xs min-w-0">
           <div class="text-[11px] sm:text-xs text-emerald-600 font-medium truncate">Total Discount Given</div>
-          <div id="statTotalDiscount" class="text-lg sm:text-xl font-extrabold font-mono text-emerald-700 mt-1 truncate">&#8377;0</div>
+          <div id="statTotalDiscount" class="text-lg sm:text-xl font-extrabold font-mono text-emerald-700 mt-1 truncate">鈧�0</div>
         </div>
         <div class="bg-white rounded-2xl p-3.5 sm:p-4 border border-neutral-200 shadow-xs min-w-0">
           <div class="text-[11px] sm:text-xs text-neutral-500 font-medium truncate">Paid Invoices</div>
@@ -841,7 +841,7 @@
         </div>
 
         <!-- Prominent Cross (X) Close Button -->
-        <button type="button" onclick="closeReceiptModal()" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-neutral-200/90 text-neutral-800 hover:bg-red-100 hover:text-red-700 hover:border-red-300 border border-neutral-300 transition flex items-center justify-center font-bold text-sm cursor-pointer shadow-2xs" title="Close Popup (✕)">
+        <button type="button" onclick="closeReceiptModal()" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-neutral-200/90 text-neutral-800 hover:bg-red-100 hover:text-red-700 hover:border-red-300 border border-neutral-300 transition flex items-center justify-center font-bold text-sm cursor-pointer shadow-2xs" title="Close Popup (鉁�)">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
@@ -895,19 +895,19 @@
         <div class="border-t border-dashed border-neutral-300 pt-3 space-y-1.5 text-xs">
           <div class="flex justify-between text-neutral-600">
             <span>Sub Total:</span>
-            <span id="receiptSubtotal" class="font-mono font-semibold">&#8377;0</span>
+            <span id="receiptSubtotal" class="font-mono font-semibold">鈧�0</span>
           </div>
           <div class="flex justify-between text-emerald-700 font-medium">
             <span>Total Discount Given:</span>
-            <span id="receiptTotalDiscount" class="font-mono font-bold">-&#8377;0</span>
+            <span id="receiptTotalDiscount" class="font-mono font-bold">-鈧�0</span>
           </div>
           <div id="receiptTaxRow" class="hidden flex justify-between text-neutral-600">
             <span id="receiptTaxLabel">GST:</span>
-            <span id="receiptTaxAmount" class="font-mono">&#8377;0</span>
+            <span id="receiptTaxAmount" class="font-mono">鈧�0</span>
           </div>
           <div class="pt-2 border-t border-neutral-900 flex justify-between items-baseline">
             <span class="text-sm font-extrabold text-neutral-900 uppercase">Final Total:</span>
-            <span id="receiptFinalTotal" class="text-xl font-extrabold font-mono text-neutral-950">&#8377;0</span>
+            <span id="receiptFinalTotal" class="text-xl font-extrabold font-mono text-neutral-950">鈧�0</span>
           </div>
         </div>
 
@@ -989,7 +989,7 @@
   </div>
 
   <!-- MODAL: OWNER LOGIN PIN LOCK -->
-  <div id="loginModal" class="hidden fixed inset-0 z-50 bg-neutral-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+  <div id="loginModal" class="fixed inset-0 z-50 bg-neutral-900/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-sm w-full p-6 sm:p-8 border border-neutral-200 shadow-2xl text-center">
       <div class="w-14 h-14 rounded-2xl bg-neutral-900 text-white mx-auto flex items-center justify-center font-extrabold text-2xl shadow-lg mb-4">
         S
@@ -1047,7 +1047,7 @@
       storePhone: '+91 98765 43210',
       storeEmail: 'contact@simmplestore.com',
       storeAddress: 'Shop 14, High Street Arcade, Fashion Avenue, Mumbai 400050',
-      currency: '\u20B9',
+      currency: '鈧�',
       invoicePrefix: 'SMP-',
       nextInvoiceNumber: 1,
       taxEnabled: false,
@@ -1090,7 +1090,7 @@
     }
 
     let state = {
-      isAuthenticated: loadFromStorage('simmple_auth', true),
+      isAuthenticated: false,
       activeTab: 'billing',
       settings: loadFromStorage('simmple_settings', DEFAULT_STORE_SETTINGS),
       products: loadFromStorage('simmple_products', INITIAL_PRODUCTS),
@@ -1112,6 +1112,21 @@
       pendingDelete: null,
       editingProductId: null
     };
+
+    // Guarantee clean currency symbol (鈧�)
+    function getCurrency() {
+      const c = state?.settings?.currency;
+      if (!c || c === '?' || c.includes('?') || c.includes('芒') || c.includes('\ufffd') || c === 'undefined') {
+        return '鈧�';
+      }
+      return c;
+    }
+
+    // Sanitize settings currency if corrupted
+    if (!state.settings.currency || state.settings.currency === '?' || state.settings.currency.includes('芒') || state.settings.currency.includes('\ufffd')) {
+      state.settings.currency = '鈧�';
+      saveToStorage('simmple_settings', state.settings);
+    }
 
     function safeCreateIcons() {
       if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
@@ -1140,7 +1155,11 @@
       const modal = document.getElementById('loginModal');
       if (!state.isAuthenticated) {
         modal.classList.remove('hidden');
-        document.getElementById('loginPinInput').focus();
+        const pinInput = document.getElementById('loginPinInput');
+        if (pinInput) {
+          pinInput.value = '';
+          setTimeout(() => pinInput.focus(), 150);
+        }
       } else {
         modal.classList.add('hidden');
       }
@@ -1224,10 +1243,11 @@
     function populateProductSelect() {
       const select = document.getElementById('selectProduct');
       select.innerHTML = '';
+      const currency = getCurrency();
       state.products.filter(p => p.inStock).forEach(prod => {
         const opt = document.createElement('option');
         opt.value = prod.id;
-        opt.textContent = `${prod.name} - ${state.settings.currency || '\u20B9'}${prod.price.toLocaleString()} (${prod.category})`;
+        opt.textContent = `${prod.name} - ${currency}${prod.price.toLocaleString()} (${prod.category})`;
         select.appendChild(opt);
       });
       if (state.products.length > 0) {
@@ -1294,7 +1314,7 @@
       if (type === 'flat') {
         btnFlat.className = 'px-2 py-0.5 rounded bg-white text-neutral-900 shadow-xs';
         btnPercent.className = 'px-2 py-0.5 rounded text-neutral-500';
-        unitSpan.textContent = state.settings.currency || '\u20B9';
+        unitSpan.textContent = getCurrency();
       } else {
         btnPercent.className = 'px-2 py-0.5 rounded bg-white text-neutral-900 shadow-xs';
         btnFlat.className = 'px-2 py-0.5 rounded text-neutral-500';
@@ -1312,11 +1332,12 @@
       let discAmt = state.pos.discountType === 'flat' ? rawDisc * qty : Math.round((subtotal * rawDisc) / 100);
       discAmt = Math.min(discAmt, subtotal);
       const total = subtotal - discAmt;
+      const currency = getCurrency();
 
-      document.getElementById('previewLineTotal').textContent = `${state.settings.currency || '\u20B9'}${total.toLocaleString()}`;
+      document.getElementById('previewLineTotal').textContent = `${currency}${total.toLocaleString()}`;
       const discBadge = document.getElementById('previewDiscountBadge');
       if (discAmt > 0) {
-        discBadge.textContent = `Discount: -${state.settings.currency || '\u20B9'}${discAmt.toLocaleString()}`;
+        discBadge.textContent = `Discount: -${currency}${discAmt.toLocaleString()}`;
         discBadge.className = 'text-[11px] text-emerald-600 font-bold';
       } else {
         discBadge.textContent = 'No discount';
@@ -1393,7 +1414,7 @@
     function updateCartDisplay() {
       const container = document.getElementById('cartItemsList');
       const countPill = document.getElementById('cartCountPill');
-      const currency = state.settings.currency || '\u20B9';
+      const currency = getCurrency();
 
       if (state.pos.cart.length === 0) {
         countPill.textContent = '0 items';
@@ -1444,7 +1465,7 @@
     }
 
     function updateBillTotals() {
-      const currency = state.settings.currency || '\u20B9';
+      const currency = getCurrency();
       const subtotal = state.pos.cart.reduce((sum, it) => sum + it.subtotal, 0);
       const totalDiscount = state.pos.cart.reduce((sum, it) => sum + (it.discountAmount || 0), 0);
       const finalTotal = subtotal - totalDiscount;
@@ -1473,19 +1494,19 @@
 
     function formatWhatsAppInvoiceMessage(invoice, settings) {
       const f = settings.billFields || DEFAULT_BILL_FIELDS;
-      const currency = settings.currency || '\u20B9';
+      const currency = getCurrency();
       const storeName = settings.storeName || 'Simmple';
       const lines = [];
 
       // Header Branding
       if (f.storeHeader !== false) {
-        lines.push(`🧾 *${storeName.toUpperCase()} - OFFICIAL INVOICE*`);
+        lines.push(`馃Ь *${storeName.toUpperCase()} - OFFICIAL INVOICE*`);
       }
       if (f.tagline !== false && settings.tagline) {
         lines.push(`_${settings.tagline}_`);
       }
       if (f.storeAddress !== false && settings.storeAddress) {
-        lines.push(`📍 ${settings.storeAddress}`);
+        lines.push(`馃搷 ${settings.storeAddress}`);
       }
 
       // Customer & Invoice Details
@@ -1495,7 +1516,7 @@
       if (f.customerName !== false) metaLines.push(`*Customer:* ${invoice.customerName}`);
       if (f.customerWhatsapp !== false) metaLines.push(`*Phone:* ${invoice.countryCode} ${invoice.customerWhatsapp}`);
       if (f.paymentMode !== false) {
-        const paymentBadge = invoice.paymentMode === 'Online' ? 'Online (Paid) ✅' : invoice.paymentMode === 'Offline' ? 'Offline (Paid) 💵' : 'Payment Pending ⏳';
+        const paymentBadge = invoice.paymentMode === 'Online' ? 'Online (Paid) 鉁�' : invoice.paymentMode === 'Offline' ? 'Offline (Paid) 馃挼' : 'Payment Pending 鈴�';
         metaLines.push(`*Payment:* ${paymentBadge}`);
       }
 
@@ -1540,13 +1561,13 @@
       // Store UPI for payments
       if (f.storeUpi !== false && settings.upiId) {
         lines.push('--------------------------------');
-        lines.push(`💳 *Pay via UPI ID:* \`${settings.upiId}\``);
+        lines.push(`馃挸 *Pay via UPI ID:* \`${settings.upiId}\``);
       }
 
       // Terms & Conditions
       if (f.termsConditions !== false && settings.termsAndConditions) {
         lines.push('--------------------------------');
-        lines.push(`📋 *Terms & Conditions:*\n${settings.termsAndConditions}`);
+        lines.push(`馃搵 *Terms & Conditions:*\n${settings.termsAndConditions}`);
       }
 
       // Footer Notes & Policies
@@ -1562,7 +1583,7 @@
         if (contactInfo) footerContacts.push(`Store Contact: ${contactInfo}`);
       }
       if (f.closingGreeting !== false) {
-        footerContacts.push(`Thank you for shopping with us! ✨`);
+        footerContacts.push(`Thank you for shopping with us! 鉁╜);
       }
 
       if (footerContacts.length > 0) {
@@ -1651,7 +1672,7 @@
 
     function openReceiptModal(invoice) {
       state.activeReceiptInvoice = invoice;
-      const currency = state.settings.currency || '\u20B9';
+      const currency = getCurrency();
 
       document.getElementById('receiptStoreName').textContent = (state.settings.storeName || 'SIMMPLE').toUpperCase();
       document.getElementById('receiptTagline').textContent = state.settings.tagline || '';
@@ -1662,7 +1683,7 @@
       document.getElementById('receiptCustomerPhone').textContent = `${invoice.countryCode} ${invoice.customerWhatsapp}`;
 
       const badge = document.getElementById('receiptPaymentBadge');
-      badge.textContent = invoice.paymentMode === 'Online' ? 'Online (Paid) ✅' : invoice.paymentMode === 'Offline' ? 'Offline (Paid) 💵' : 'Payment Pending ⏳';
+      badge.textContent = invoice.paymentMode === 'Online' ? 'Online (Paid) 鉁�' : invoice.paymentMode === 'Offline' ? 'Offline (Paid) 馃挼' : 'Payment Pending 鈴�';
 
       const tbody = document.getElementById('receiptItemsBody');
       tbody.innerHTML = '';
@@ -1737,7 +1758,7 @@
     function renderInvoicesList() {
       const tbody = document.getElementById('invoicesTableBody');
       const search = (document.getElementById('invoiceSearchInput').value || '').toLowerCase().trim();
-      const currency = state.settings.currency || '\u20B9';
+      const currency = getCurrency();
 
       const totalRev = state.invoices.reduce((sum, inv) => sum + (inv.status === 'paid' ? inv.finalTotal : 0), 0);
       const totalDisc = state.invoices.reduce((sum, inv) => sum + (inv.totalDiscount || 0), 0);
@@ -1851,10 +1872,11 @@
       const inv = state.invoices.find(i => i.id === invoiceId);
       if (!inv) return;
       state.pendingDelete = { type: 'invoice', id: invoiceId, invoiceNo: inv.invoiceNo };
+      const currency = getCurrency();
       document.getElementById('deleteModalTitle').textContent = `Delete Invoice ${inv.invoiceNo}?`;
       document.getElementById('deleteModalContent').innerHTML = `
         <div class="text-neutral-700">Customer: <b>${escapeHtml(inv.customerName)}</b></div>
-        <div class="text-neutral-500">Amount: <b>${state.settings.currency || '\u20B9'}${inv.finalTotal}</b></div>
+        <div class="text-neutral-500">Amount: <b>${currency}${inv.finalTotal}</b></div>
       `;
       document.getElementById('deleteConfirmModal').classList.remove('hidden');
       safeCreateIcons();
@@ -2042,7 +2064,7 @@
       document.getElementById('adminStoreName').value = s.storeName || '';
       document.getElementById('adminStoreTagline').value = s.tagline || '';
       document.getElementById('adminStoreAddress').value = s.storeAddress || '';
-      document.getElementById('adminStoreCurrency').value = s.currency || '\u20B9';
+      document.getElementById('adminStoreCurrency').value = getCurrency();
       document.getElementById('adminStorePrefix').value = s.invoicePrefix || 'SMP-';
       document.getElementById('adminStoreNextInv').value = s.nextInvoiceNumber || 1;
       document.getElementById('adminStoreFooter').value = s.customFooter || '';
@@ -2062,7 +2084,7 @@
       state.settings.storeName = document.getElementById('adminStoreName').value.trim() || 'Simmple';
       state.settings.tagline = document.getElementById('adminStoreTagline').value.trim();
       state.settings.storeAddress = document.getElementById('adminStoreAddress').value.trim();
-      state.settings.currency = document.getElementById('adminStoreCurrency').value.trim() || '\u20B9';
+      state.settings.currency = document.getElementById('adminStoreCurrency').value.trim() || '鈧�';
       state.settings.invoicePrefix = document.getElementById('adminStorePrefix').value.trim() || 'SMP-';
       state.settings.nextInvoiceNumber = parseInt(document.getElementById('adminStoreNextInv').value) || 1;
       state.settings.customFooter = document.getElementById('adminStoreFooter').value.trim();
@@ -2089,7 +2111,7 @@
       if (badge) badge.textContent = `${state.products.length} Products`;
       if (!container) return;
 
-      const currency = state.settings.currency || '\u20B9';
+      const currency = getCurrency();
       container.innerHTML = '';
 
       state.products.forEach(prod => {
