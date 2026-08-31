@@ -1,0 +1,2250 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Simmple Store Billing</title>
+  <meta name="description" content="Billing, invoice generation, and WhatsApp dispatch system with admin catalog management for Simmple brand store." />
+  <meta property="og:title" content="Simmple Store Billing" />
+  <meta property="og:description" content="Billing, invoice generation, and WhatsApp dispatch system with admin catalog management for Simmple brand store." />
+  <meta property="og:type" content="website" />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#f8f8f8',
+              100: '#f0f0f0',
+              200: '#e4e4e4',
+              700: '#262626',
+              800: '#171717',
+              900: '#0a0a0a',
+            },
+            wa: {
+              green: '#25D366',
+              dark: '#128C7E',
+              teal: '#075E54',
+              bg: '#EFEAE2',
+              bubble: '#E7FCE3',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    html, body {
+      overflow-x: hidden !important;
+      max-width: 100vw;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      -webkit-text-size-adjust: 100%;
+      touch-action: manipulation;
+    }
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    @media print {
+      body * {
+        visibility: hidden !important;
+      }
+      #printableReceipt, #printableReceipt * {
+        visibility: visible !important;
+      }
+      #printableReceipt {
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 24px !important;
+        background: white !important;
+        color: black !important;
+        box-shadow: none !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #ccc;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-neutral-100/70 text-neutral-900 font-sans min-h-screen flex flex-col antialiased selection:bg-neutral-900 selection:text-white w-full overflow-x-hidden">
+
+  <!-- TOP HEADER / NAVBAR -->
+  <header class="bg-white border-b border-neutral-200 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2 sm:py-0 sm:h-16 gap-2 sm:gap-4">
+        <!-- Logo, Store Name & Mobile Top Actions -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-neutral-900 text-white flex items-center justify-center font-bold text-base sm:text-xl tracking-tight shadow-xs shrink-0">
+              S
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span id="navStoreName" class="font-extrabold tracking-tight text-base sm:text-lg leading-tight truncate">Simmple</span>
+                <span class="text-[9px] sm:text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0.5 bg-neutral-100 text-neutral-600 rounded-md border border-neutral-200 shrink-0">POS</span>
+              </div>
+              <p id="navTagline" class="text-xs text-neutral-500 hidden md:block truncate">Minimalist Essentials & Contemporary Apparel</p>
+            </div>
+          </div>
+
+          <!-- Quick Top Actions (WhatsApp & Lock) -->
+          <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <a id="navWhatsappLink" href="#" target="_blank" class="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 sm:px-2.5 py-1.5 rounded-lg border border-emerald-200/60 hover:bg-emerald-100 transition">
+              <i data-lucide="phone" class="w-3.5 h-3.5 text-emerald-600"></i>
+              <span id="navStoreWhatsappText" class="hidden sm:inline">+91 98765 43210</span>
+              <span class="sm:hidden text-[11px]">Chat</span>
+            </a>
+            <button onclick="logoutOwner()" title="Lock / Logout Owner" class="p-1.5 sm:p-2 rounded-lg border border-neutral-200 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 transition flex items-center gap-1 text-xs font-medium cursor-pointer">
+              <i data-lucide="lock" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+              <span class="hidden sm:inline">Lock</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="grid grid-cols-3 sm:flex sm:items-center gap-1 sm:gap-2 bg-neutral-100 p-1 rounded-xl border border-neutral-200 w-full sm:w-auto">
+          <button id="tabBtnBilling" onclick="switchTab('billing')" class="px-2 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-1.5 bg-white text-neutral-900 shadow-xs cursor-pointer">
+            <i data-lucide="receipt" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-neutral-700 shrink-0"></i>
+            <span class="truncate">New Bill</span>
+          </button>
+          <button id="tabBtnInvoices" onclick="switchTab('invoices')" class="px-2 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center justify-center gap-1 sm:gap-1.5 text-neutral-600 hover:text-neutral-900 cursor-pointer">
+            <i data-lucide="file-text" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
+            <span class="truncate">Invoices</span>
+            <span id="invoicesCountBadge" class="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-neutral-200 text-neutral-700 shrink-0">0</span>
+          </button>
+          <button id="tabBtnAdmin" onclick="switchTab('admin')" class="px-2 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center justify-center gap-1.5 text-neutral-600 hover:text-neutral-900 cursor-pointer">
+            <i data-lucide="sliders" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
+            <span class="truncate">Admin</span>
+          </button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN WRAPPER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 lg:p-8 min-w-0">
+
+    <!-- TAB 1: BILLING POS -->
+    <div id="viewBilling" class="block space-y-4 sm:space-y-6">
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-neutral-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+        <div class="min-w-0 flex-1">
+          <h1 class="text-lg sm:text-xl font-bold tracking-tight text-neutral-900 break-words flex items-center gap-2">
+            <span>New Sale & Instant WhatsApp Invoice</span>
+          </h1>
+          <p class="text-xs sm:text-sm text-neutral-500 mt-0.5">Select products, customize variants and discount, and dispatch receipt in 1-click.</p>
+        </div>
+        <div class="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-neutral-100">
+          <div class="text-left sm:text-right">
+            <div class="text-[10px] sm:text-xs text-neutral-400 font-medium">Next Invoice #</div>
+            <div id="displayNextInvoiceNo" class="text-xs sm:text-sm font-mono font-bold text-neutral-800">SMP-2026-0001</div>
+          </div>
+          <button onclick="resetBillForm()" class="px-3 py-2 text-xs font-semibold text-neutral-600 hover:text-neutral-900 bg-neutral-100 hover:bg-neutral-200 rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+            <span>Clear Bill</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- LEFT: Customer Details & Product Selection -->
+        <div class="lg:col-span-7 space-y-6">
+          <!-- Step 1: Customer Details -->
+          <div class="bg-white rounded-2xl p-5 sm:p-6 border border-neutral-200 shadow-xs">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="w-6 h-6 rounded-full bg-neutral-900 text-white flex items-center justify-center text-xs font-bold">1</span>
+              <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-700">Customer Details</h2>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-neutral-700 mb-1.5">
+                  Customer WhatsApp No <span class="text-red-500">*</span>
+                </label>
+                <div class="flex rounded-xl border border-neutral-200 focus-within:ring-2 focus-within:ring-neutral-900 focus-within:border-neutral-900 transition overflow-hidden min-w-0">
+                  <select id="inputCountryCode" class="bg-neutral-50 px-2 sm:px-2.5 py-2 text-xs font-semibold text-neutral-700 border-r border-neutral-200 outline-hidden shrink-0">
+                    <option value="+91">+91 (IN)</option>
+                    <option value="+1">+1 (US/CA)</option>
+                    <option value="+44">+44 (UK)</option>
+                    <option value="+971">+971 (UAE)</option>
+                    <option value="+65">+65 (SG)</option>
+                    <option value="+61">+61 (AU)</option>
+                  </select>
+                  <input type="tel" id="inputCustomerPhone" placeholder="9876543210" class="flex-1 px-3 py-2 text-sm text-neutral-900 outline-hidden font-mono min-w-0" />
+                </div>
+                <p class="text-[11px] text-neutral-400 mt-1">Invoice will be directly sent to this WhatsApp.</p>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-neutral-700 mb-1.5">
+                  Customer Name <span class="text-red-500">*</span>
+                </label>
+                <input type="text" id="inputCustomerName" placeholder="e.g. Aryan Sharma" class="w-full px-3 py-2 text-sm text-neutral-900 rounded-xl border border-neutral-200 focus:ring-2 focus:ring-neutral-900 focus:border-neutral-900 outline-hidden transition" />
+                <p class="text-[11px] text-neutral-400 mt-1">Printed on official store invoice.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: Product & Variant Selection -->
+          <div class="bg-white rounded-2xl p-5 sm:p-6 border border-neutral-200 shadow-xs">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-full bg-neutral-900 text-white flex items-center justify-center text-xs font-bold">2</span>
+                <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-700">Select Item & Customize</h2>
+              </div>
+              <span id="productCategoryBadge" class="text-xs px-2.5 py-0.5 rounded-full bg-neutral-100 font-medium text-neutral-600">Category</span>
+            </div>
+
+            <div class="mb-4">
+              <label class="block text-xs font-semibold text-neutral-700 mb-1.5">Select Product</label>
+              <select id="selectProduct" onchange="onProductSelectChange()" class="w-full px-3.5 py-2.5 text-sm font-medium bg-neutral-50 rounded-xl border border-neutral-200 focus:ring-2 focus:ring-neutral-900 focus:border-neutral-900 outline-hidden transition">
+              </select>
+            </div>
+
+            <div class="mb-4">
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="text-xs font-semibold text-neutral-700">Choose Color Variant</label>
+                <span id="selectedColorDisplay" class="text-xs font-mono font-semibold text-neutral-900">Jet Black</span>
+              </div>
+              <div id="colorVariantsContainer" class="flex flex-wrap gap-2">
+              </div>
+              <div class="mt-2.5 flex items-center gap-2">
+                <input type="text" id="inputCustomColor" placeholder="Or enter custom color name..." class="flex-1 px-3 py-1.5 text-xs rounded-lg border border-neutral-200 outline-hidden focus:border-neutral-900 transition" />
+                <button onclick="applyCustomColor()" class="px-3 py-1.5 bg-neutral-200 hover:bg-neutral-300 text-neutral-800 text-xs font-medium rounded-lg transition">Apply</button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-neutral-100">
+              <div>
+                <label class="block text-xs font-semibold text-neutral-700 mb-1.5">Quantity</label>
+                <div class="flex items-center rounded-xl border border-neutral-200 bg-neutral-50 p-1 w-full sm:w-44">
+                  <button onclick="adjustQty(-1)" class="w-9 h-9 flex items-center justify-center rounded-lg bg-white text-neutral-700 hover:bg-neutral-200 transition font-bold text-base shadow-xs">-</button>
+                  <input type="number" id="inputQty" value="1" min="1" onchange="calculateLineItemPreview()" class="flex-1 text-center bg-transparent text-sm font-bold font-mono outline-hidden" />
+                  <button onclick="adjustQty(1)" class="w-9 h-9 flex items-center justify-center rounded-lg bg-white text-neutral-700 hover:bg-neutral-200 transition font-bold text-base shadow-xs">+</button>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label class="text-xs font-semibold text-neutral-700">Item Discount</label>
+                  <div class="flex rounded-md bg-neutral-100 p-0.5 text-[10px] font-semibold">
+                    <button id="discountTypeFlat" onclick="setDiscountType('flat')" class="px-2 py-0.5 rounded bg-white text-neutral-900 shadow-xs">&#8377; Flat</button>
+                    <button id="discountTypePercent" onclick="setDiscountType('percent')" class="px-2 py-0.5 rounded text-neutral-500">Percent %</button>
+                  </div>
+                </div>
+                <div class="relative">
+                  <input type="number" id="inputItemDiscount" value="0" min="0" oninput="calculateLineItemPreview()" class="w-full px-3 py-2 text-sm font-mono text-neutral-900 rounded-xl border border-neutral-200 focus:ring-2 focus:ring-neutral-900 focus:border-neutral-900 outline-hidden transition" />
+                  <span id="discountTypeUnit" class="absolute right-3 top-2.5 text-xs text-neutral-400 font-mono">&#8377;</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-5 p-4 rounded-xl bg-neutral-50 border border-neutral-200 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+              <div class="min-w-0">
+                <div class="text-[11px] text-neutral-500 font-medium">Item Subtotal:</div>
+                <div class="flex items-baseline gap-2">
+                  <span id="previewLineTotal" class="text-lg font-bold font-mono text-neutral-900">&#8377;899</span>
+                  <span id="previewDiscountBadge" class="text-[11px] text-emerald-600 font-medium">No discount</span>
+                </div>
+              </div>
+
+              <button onclick="addItemToCart()" class="w-full sm:w-auto px-5 py-2.5 bg-neutral-900 hover:bg-neutral-800 active:scale-98 text-white rounded-xl text-xs sm:text-sm font-semibold transition shadow-xs flex items-center justify-center gap-2 cursor-pointer">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                <span>Add Product to Bill</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Order Items Cart & Final Dispatch -->
+        <div class="lg:col-span-5 space-y-6">
+          <div class="bg-white rounded-2xl p-5 sm:p-6 border border-neutral-200 shadow-xs flex flex-col">
+            <div class="flex items-center justify-between pb-4 border-b border-neutral-100">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-full bg-neutral-900 text-white flex items-center justify-center text-xs font-bold">3</span>
+                <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-700">Order Items</h2>
+              </div>
+              <span id="cartCountPill" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-neutral-100 text-neutral-700">0 items</span>
+            </div>
+
+            <div id="cartItemsList" class="divide-y divide-neutral-100 my-4 max-h-[300px] overflow-y-auto custom-scrollbar">
+              <div class="py-12 text-center text-neutral-400">
+                <i data-lucide="shopping-bag" class="w-10 h-10 mx-auto mb-2 opacity-30"></i>
+                <p class="text-xs font-medium">No items added to bill yet.</p>
+                <p class="text-[11px] text-neutral-400 mt-0.5">Select a product on the left and click "Add Product".</p>
+              </div>
+            </div>
+
+            <!-- Payment Mode Selection -->
+            <div class="pt-4 border-t border-neutral-100">
+              <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-2">
+                Payment Mode <span class="text-red-500">*</span>
+              </label>
+              <div class="grid grid-cols-3 gap-1.5 sm:gap-2">
+                <button type="button" id="payModeOnline" onclick="setPaymentMode('Online')" class="p-2 sm:p-2.5 rounded-xl border-2 border-neutral-900 bg-neutral-900 text-white text-xs font-bold text-center transition flex flex-col items-center gap-1 shadow-xs cursor-pointer">
+                  <i data-lucide="zap" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+                  <span class="truncate w-full text-center text-[11px] sm:text-xs">Online</span>
+                </button>
+                <button type="button" id="payModeOffline" onclick="setPaymentMode('Offline')" class="p-2 sm:p-2.5 rounded-xl border-2 border-neutral-200 hover:border-neutral-300 bg-white text-neutral-700 text-xs font-medium text-center transition flex flex-col items-center gap-1 cursor-pointer">
+                  <i data-lucide="banknote" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+                  <span class="truncate w-full text-center text-[11px] sm:text-xs">Offline</span>
+                </button>
+                <button type="button" id="payModePending" onclick="setPaymentMode('Payment Pending')" class="p-2 sm:p-2.5 rounded-xl border-2 border-neutral-200 hover:border-neutral-300 bg-white text-neutral-700 text-xs font-medium text-center transition flex flex-col items-center gap-1 cursor-pointer">
+                  <i data-lucide="clock" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+                  <span class="truncate w-full text-center text-[11px] sm:text-xs">Pending</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Billing Calculation Summary -->
+            <div class="mt-5 p-4 rounded-xl bg-neutral-50/80 border border-neutral-200/80 space-y-2">
+              <div class="flex justify-between text-xs text-neutral-600 font-medium">
+                <span>Sub Total:</span>
+                <span id="billSubtotal" class="font-mono font-semibold text-neutral-900">&#8377;0</span>
+              </div>
+              <div class="flex justify-between text-xs text-emerald-700 font-medium">
+                <span>Total Discount Given:</span>
+                <span id="billTotalDiscount" class="font-mono font-bold">-&#8377;0</span>
+              </div>
+              <div id="taxRowContainer" class="hidden flex justify-between text-xs text-neutral-600 font-medium">
+                <span id="taxLabelDisplay">GST (18%):</span>
+                <span id="billTaxAmount" class="font-mono font-semibold text-neutral-900">&#8377;0</span>
+              </div>
+              <div class="pt-2 border-t border-neutral-200 flex justify-between items-baseline">
+                <span class="text-sm font-extrabold uppercase tracking-tight text-neutral-900">Final Total:</span>
+                <span id="billFinalTotal" class="text-xl font-extrabold font-mono text-neutral-950">&#8377;0</span>
+              </div>
+            </div>
+
+            <!-- Dispatch Buttons -->
+            <div class="mt-5 space-y-2.5">
+              <button onclick="generateAndSendWhatsApp()" class="w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-98 text-white font-bold text-sm tracking-wide shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2 cursor-pointer">
+                <i data-lucide="send" class="w-4 h-4"></i>
+                <span>Generate Bill & Send to WhatsApp</span>
+              </button>
+
+              <button onclick="previewInvoiceModal()" class="w-full py-2.5 px-4 rounded-xl border border-neutral-200 hover:bg-neutral-50 text-neutral-700 font-semibold text-xs transition flex items-center justify-center gap-2 cursor-pointer">
+                <i data-lucide="printer" class="w-4 h-4"></i>
+                <span>Preview Receipt & Print</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: INVOICES HISTORY & MANAGEMENT -->
+    <div id="viewInvoices" class="hidden space-y-4 sm:space-y-6">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+        <div class="bg-white rounded-2xl p-3.5 sm:p-4 border border-neutral-200 shadow-xs min-w-0">
+          <div class="text-[11px] sm:text-xs text-neutral-500 font-medium truncate">Total Store Revenue</div>
+          <div id="statTotalRevenue" class="text-lg sm:text-xl font-extrabold font-mono text-neutral-900 mt-1 truncate">&#8377;0</div>
+        </div>
+        <div class="bg-white rounded-2xl p-3.5 sm:p-4 border border-neutral-200 shadow-xs min-w-0">
+          <div class="text-[11px] sm:text-xs text-emerald-600 font-medium truncate">Total Discount Given</div>
+          <div id="statTotalDiscount" class="text-lg sm:text-xl font-extrabold font-mono text-emerald-700 mt-1 truncate">&#8377;0</div>
+        </div>
+        <div class="bg-white rounded-2xl p-3.5 sm:p-4 border border-neutral-200 shadow-xs min-w-0">
+          <div class="text-[11px] sm:text-xs text-neutral-500 font-medium truncate">Paid Invoices</div>
+          <div id="statPaidCount" class="text-lg sm:text-xl font-extrabold font-mono text-neutral-900 mt-1">0</div>
+        </div>
+        <div class="bg-white rounded-2xl p-3.5 sm:p-4 border border-neutral-200 shadow-xs min-w-0">
+          <div class="text-[11px] sm:text-xs text-amber-600 font-medium truncate">Pending Payments</div>
+          <div id="statPendingCount" class="text-lg sm:text-xl font-extrabold font-mono text-amber-600 mt-1">0</div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-neutral-200 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 sm:gap-4">
+        <div class="w-full md:flex-1 min-w-0 relative">
+          <i data-lucide="search" class="w-4 h-4 text-neutral-400 absolute left-3.5 top-3"></i>
+          <input type="text" id="invoiceSearchInput" oninput="renderInvoicesList()" placeholder="Search by customer name, phone, or invoice no..." class="w-full pl-10 pr-4 py-2 text-xs sm:text-sm rounded-xl border border-neutral-200 outline-hidden focus:ring-2 focus:ring-neutral-900 focus:border-neutral-900 transition" />
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full md:w-auto">
+          <div class="flex rounded-xl bg-neutral-100 p-1 text-xs font-semibold justify-between sm:justify-start">
+            <button onclick="setInvoiceFilter('All')" id="filterAll" class="px-2.5 sm:px-3 py-1.5 rounded-lg bg-white text-neutral-900 shadow-xs flex-1 sm:flex-none text-center cursor-pointer">All</button>
+            <button onclick="setInvoiceFilter('Online')" id="filterOnline" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-neutral-600 hover:text-neutral-900 flex-1 sm:flex-none text-center cursor-pointer">Online</button>
+            <button onclick="setInvoiceFilter('Offline')" id="filterOffline" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-neutral-600 hover:text-neutral-900 flex-1 sm:flex-none text-center cursor-pointer">Offline</button>
+            <button onclick="setInvoiceFilter('Payment Pending')" id="filterPending" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-neutral-600 hover:text-neutral-900 flex-1 sm:flex-none text-center cursor-pointer">Pending</button>
+          </div>
+
+          <div class="flex items-center gap-2 justify-end">
+            <button onclick="exportInvoicesCSV()" class="px-3.5 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow-xs cursor-pointer">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>Export CSV</span>
+            </button>
+            <button onclick="openClearAllInvoicesModal()" class="px-3 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer" title="Clear all invoice records">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              <span>Clear All</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Invoices List / Table with clearly styled, fully visible action buttons -->
+      <div class="bg-white rounded-2xl border border-neutral-200 shadow-xs overflow-hidden w-full">
+        <div class="overflow-x-auto w-full custom-scrollbar">
+          <table class="w-full text-left text-xs sm:text-sm min-w-[760px]">
+            <thead class="bg-neutral-50 text-neutral-600 text-[11px] font-bold uppercase tracking-wider border-b border-neutral-200">
+              <tr>
+                <th class="py-3.5 px-4 font-bold">Invoice #</th>
+                <th class="py-3.5 px-4 font-bold">Date & Time</th>
+                <th class="py-3.5 px-4 font-bold">Customer</th>
+                <th class="py-3.5 px-4 font-bold">Items</th>
+                <th class="py-3.5 px-4 font-bold">Status</th>
+                <th class="py-3.5 px-4 text-right font-bold">Discount</th>
+                <th class="py-3.5 px-4 text-right font-bold">Final Total</th>
+                <th class="py-3.5 px-4 text-center font-bold">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="invoicesTableBody" class="divide-y divide-neutral-100">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: ADMIN SETTINGS PANEL -->
+    <div id="viewAdmin" class="hidden space-y-4 sm:space-y-6">
+      <div class="bg-white rounded-2xl p-4 sm:p-6 border border-neutral-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+        <div class="min-w-0 flex-1">
+          <h1 class="text-lg sm:text-xl font-bold tracking-tight text-neutral-900 break-words">Admin Store & WhatsApp Configuration</h1>
+          <p class="text-xs sm:text-sm text-neutral-500 mt-0.5">Manage your store contacts, WhatsApp number, billing policies, and product catalog.</p>
+        </div>
+        <div class="flex items-center gap-2 self-start sm:self-auto shrink-0 flex-wrap">
+          <button onclick="resetAllDemoData()" class="px-3 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs font-semibold transition cursor-pointer">
+            Reset Data
+          </button>
+          <button onclick="saveAdminSettings()" class="px-4 sm:px-5 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs sm:text-sm font-semibold transition shadow-xs flex items-center gap-1.5 cursor-pointer">
+            <i data-lucide="save" class="w-4 h-4"></i>
+            <span>Save Settings</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Settings Form -->
+        <div class="lg:col-span-7 space-y-6">
+          <div class="bg-white rounded-2xl p-4 sm:p-6 border border-neutral-200 shadow-xs">
+            <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-700 mb-4 flex items-center gap-2">
+              <i data-lucide="message-square" class="w-4 h-4 text-emerald-600"></i>
+              <span>Store WhatsApp & Contact Setup</span>
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-neutral-700 mb-1.5">Store WhatsApp Number</label>
+                <input type="text" id="adminStoreWhatsapp" class="w-full px-3 py-2 text-sm rounded-xl border border-neutral-200 outline-hidden font-mono" />
+                <p class="text-[11px] text-neutral-400 mt-1">Included in every WhatsApp receipt for replies.</p>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-neutral-700 mb-1.5">Store Phone</label>
+                <input type="text" id="adminStorePhone" class="w-full px-3 py-2 text-sm rounded-xl border border-neutral-200 outline-hidden font-mono" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-neutral-700 mb-1.5">UPI ID for Online Payments</label>
+                <input type="text" id="adminStoreUpi" class="w-full px-3 py-2 text-sm rounded-xl border border-neutral-200 outline-hidden font-mono" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-neutral-700 mb-1.5">Store Email</label>
+                <input type="email" id="adminStoreEmail" class="w-full px-3 py-2 text-sm rounded-xl border border-neutral-200 outline-hidden" />
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl p-4 sm:p-6 border border-neutral-200 shadow-xs">
+            <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-700 mb-4 flex items-center gap-2">
+              <i data-lucide="store" class="w-4 h-4 text-neutral-700"></i>
+              <span>Store Details & Billing Rules</span>
+            </h2>
+            <div class="space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-neutral-700 mb-1.5">Store Name</label>
+                  <input type="text" id="adminStoreName" class="w-full px-3 py-2 text-sm rounded-xl border border-neutral-200 outline-hidden" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-neutral-700 mb-1.5">Store Tagline</label>
+                  <input type="text" id="adminStoreTagline" class="w-full px-3 py-2 text-sm rounded-xl border border-neutral-200 outline-hidden" />
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-neutral-700 mb-1.5">Store Physical Address</label>
+                <input type="text" id="adminStoreAddress" class="w-full px-3 py-2 text-sm rounded-xl border border-neutral-200 outline-hidden" />
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label class="block text-xs font-semibold text-neutral-700 mb-1.5">Currency</label>
+                  <input type="text" id="adminStoreCurrency" class="w-full px-3 py-2 text-sm font-mono rounded-xl border border-neutral-200 outline-hidden" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-neutral-700 mb-1.5">Invoice Prefix</label>
+                  <input type="text" id="adminStorePrefix" class="w-full px-3 py-2 text-sm font-mono rounded-xl border border-neutral-200 outline-hidden" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-neutral-700 mb-1.5">Next Invoice #</label>
+                  <input type="number" id="adminStoreNextInv" class="w-full px-3 py-2 text-sm font-mono rounded-xl border border-neutral-200 outline-hidden" />
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-neutral-700 mb-1.5">Exchange / Return Policy & Footer Notes</label>
+                <textarea id="adminStoreFooter" rows="2" class="w-full px-3 py-2 text-xs text-neutral-900 rounded-xl border border-neutral-200 outline-hidden"></textarea>
+              </div>
+
+              <div class="pt-2 border-t border-neutral-100 flex items-center justify-between">
+                <div>
+                  <label class="text-xs font-semibold text-neutral-700">Owner PIN (Default: 1234)</label>
+                  <p class="text-[11px] text-neutral-400">PIN required to unlock the store interface.</p>
+                </div>
+                <input type="password" id="adminOwnerPin" maxlength="6" class="w-28 px-3 py-1.5 text-sm font-mono text-center rounded-xl border border-neutral-200 outline-hidden" />
+              </div>
+            </div>
+          </div>
+
+          <!-- WhatsApp Bill Content Customizer (Checkboxes for details to send in bill) -->
+          <div class="bg-white rounded-2xl p-5 sm:p-6 border border-neutral-200 shadow-xs space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-100 pb-3">
+              <div>
+                <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-700 flex items-center gap-2">
+                  <i data-lucide="check-square" class="w-4 h-4 text-emerald-600"></i>
+                  <span>WhatsApp Bill Content Customizer</span>
+                </h2>
+                <p class="text-xs text-neutral-500 mt-0.5">Select what information is included in the bill sent to the customer via WhatsApp.</p>
+              </div>
+              <span id="activeFieldsBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-mono">18 / 18 Active</span>
+            </div>
+
+            <!-- Quick Selection Presets -->
+            <div class="flex items-center gap-2 flex-wrap text-xs pb-1">
+              <span class="font-semibold text-neutral-500">Quick Presets:</span>
+              <button type="button" onclick="setBillTemplatePreset('all')" class="px-2.5 py-1 font-semibold rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-800 transition cursor-pointer">Select All</button>
+              <button type="button" onclick="setBillTemplatePreset('compact')" class="px-2.5 py-1 font-semibold rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-800 transition cursor-pointer">Compact Bill</button>
+              <button type="button" onclick="setBillTemplatePreset('standard')" class="px-2.5 py-1 font-semibold rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-800 transition cursor-pointer">Standard Default</button>
+            </div>
+
+            <!-- Checkbox Groups Grid -->
+            <div class="space-y-3">
+              <!-- Group 1: Store & Header Branding -->
+              <div class="p-3.5 rounded-xl bg-neutral-50/80 border border-neutral-200">
+                <div class="text-xs font-bold text-neutral-800 mb-2 flex items-center gap-1.5">
+                  <i data-lucide="store" class="w-3.5 h-3.5 text-neutral-600"></i>
+                  <span>Store Branding & Header</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                  <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" id="chk_storeHeader" onchange="onBillFieldToggle('storeHeader', this.checked)" class="w-4 h-4 rounded text-neutral-900 focus:ring-neutral-900 border-neutral-300">
+                    <span class="font-medium text-neutral-700">Store Name & Header</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" id="chk_tagline" onchange="onBillFieldToggle('tagline', this.checked)" class="w-4 h-4 rounded text-neutral-900 focus:ring-neutral-900 border-neutral-300">
+                    <span class="font-medium text-neutral-700">Store Tagline / Slogan</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" id="chk_storeAddress" onchange="onBillFieldToggle('storeAddress', this.checked)" class="w-4 h-4 rounded text-neutral-900 focus:ring-neutral-900 border-neutral-300">
+                    <span class="font-medium text-neutral-700">Store Address</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" id="chk_storeContact" onchange="onBillFieldToggle('storeContact', this.checked)" class="w-4 h-4 rounded text-neutral-900 focus:ring-neutral-900 border-neutral-300">
+                    <span class="font-medium text-neutral-700">Store WhatsApp / Phone</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer select-none sm:col-span-2">
+                    <input type="checkbox" id="chk_storeUpi" onchange="onBillFieldToggle('storeUpi', this.checked)" class="w-4 h-4 rounded text-neutral-900 focus:ring-neutral-900 border-neutral-300">
+                    <span class="font-medium text-neutral-700">Store UPI ID (For Direct Payments)</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Group 2: Customer & Invoice Identifiers -->
+              <div class="p-3.5 rounded-xl bg-neutral-50/80 border border-neutral-200">
+                <div class="text-xs font-bold text-neutral-800 mb-2 flex items-center gap-1.5">
+                  <i data-lucide="user" class="w-3.5 h-3.5 text-neutral-600"></i>
+                  <span>Customer & Invoice Identifiers</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                  <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" id="chk_invoiceNo" onchange="onBillFieldToggle('invoiceNo', this.checked)" class="w-4 h-4 rounded text-neutral-900 focus:ring-neutral-900 border-neutral-300">
+                    <span class="font-medium text-neutral-700 font-semibold">Invoice Number</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" id="chk_date" onchange="onBillFieldToggle('date', this.checked)" class="w-4 h-4 rounded text-neutral-900 focus:ring-neutral-900 border-neutral-300">
+                    <span class="font-medium text-neutral-700">Date & Time</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" id="chk_customerName" onchange="onBillFieldToggle('customerName', this.checked)" class="w-4 h-4 rounded text-neutral-900 focus:ring-neutral-900 border-neutral-300">
+                    <span class="font-medium text-neutral-700 font-semibold">Customer Name</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" id="chk_customerWhatsapp" onchange="onBillFieldToggle('customerWhatsapp', this.checked)" class="w-4 h-4 rounded text-neutral-900 focus:ring-neutral-900 border-neutral-300">
+                    <span class="font-medium text-neutral-700 font-semibold">Customer Phone</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer select-none sm:col-span-2">
+                    <input type="checkbox" id="chk_paymentMode" onchange="onBillFieldToggle('paymentMode', this.checked)" class="w-4 h-4 rounded text-neutral-900 focus:ring-neutral-900 border-neutral-300">
+                    <span class="font-medium text-neutral-700">Payment Mode Badge (Online / Offline / Pending)</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Group 3: Items & Breakdown -->
+              <div class="p-3.5 rounded-xl bg-neutral-50/80 border border-neutral-200">
+                <div class="text-xs font-bold text-neutral-800 mb-2 flex items-center gap-1.5">
+                  <i data-lucide="package" class="w-3.5 h-3.5 text-neutral-600"></i>
+                  <span>Items & Line Breakdown</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                  <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" id="chk_itemsList" onchange="onBillFieldToggle('itemsList', this.checked)" class="w-4 h-4 rounded text-neutral-900 focus:ring-neutral-900 border-neutral-300">
+                    <span class="font-medium text-neutral-700 font-semibold">Itemized Products</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" id="chk_itemColor" onchange="onBillFieldToggle('itemColor', this.checked)" class="w-4 h-4 rounded text-neutral-900 focus:ring-neutral-900 border-neutral-300">
+                    <span class="font-medium text-neutral-700">Color Variant</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" id="chk_itemPricing" onchange="onBillFieldToggle('itemPricing', this.checked)" class="w-4 h-4 rounded text-neutral-900 focus:ring-neutral-900 border-neutral-300">
+                    <span class="font-medium text-neutral-700">Price & Qty Math (Qty x Price)</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" id="chk_itemDiscount" onchange="onBillFieldToggle('itemDiscount', this.checked)" class="w-4 h-4 rounded text-neutral-900 focus:ring-neutral-900 border-neutral-300">
+                    <span class="font-medium text-neutral-700">Item Discount Note</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Group 4: Totals & Financials -->
+              <div class="p-3.5 rounded-xl bg-neutral-50/80 border border-neutral-200">
+                <div class="text-xs font-bold text-neutral-800 mb-2 flex items-center gap-1.5">
+                  <i data-lucide="calculator" class="w-3.5 h-3.5 text-neutral-600"></i>
+                  <span>Totals, Subtotal & Discounts</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                  <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" id="chk_subtotal" onchange="onBillFieldToggle('subtotal', this.checked)" class="w-4 h-4 rounded text-neutral-900 focus:ring-neutral-900 border-neutral-300">
+                    <span class="font-medium text-neutral-700 font-bold">Sub Total Amount</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" id="chk_totalDiscount" onchange="onBillFieldToggle('totalDiscount', this.checked)" class="w-4 h-4 rounded text-neutral-900 focus:ring-neutral-900 border-neutral-300">
+                    <span class="font-medium text-neutral-700 font-semibold">Total Discount Given</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" id="chk_finalTotal" onchange="onBillFieldToggle('finalTotal', this.checked)" class="w-4 h-4 rounded text-neutral-900 focus:ring-neutral-900 border-neutral-300">
+                    <span class="font-medium text-neutral-700 font-bold">Final Total Payable</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Group 5: Footer & Closing -->
+              <div class="p-3.5 rounded-xl bg-neutral-50/80 border border-neutral-200">
+                <div class="text-xs font-bold text-neutral-800 mb-2 flex items-center gap-1.5">
+                  <i data-lucide="shield-check" class="w-3.5 h-3.5 text-neutral-600"></i>
+                  <span>Footer Policy & Greetings</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                  <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" id="chk_footerPolicy" onchange="onBillFieldToggle('footerPolicy', this.checked)" class="w-4 h-4 rounded text-neutral-900 focus:ring-neutral-900 border-neutral-300">
+                    <span class="font-medium text-neutral-700">Store Policy Note</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" id="chk_closingGreeting" onchange="onBillFieldToggle('closingGreeting', this.checked)" class="w-4 h-4 rounded text-neutral-900 focus:ring-neutral-900 border-neutral-300">
+                    <span class="font-medium text-neutral-700">Closing Greeting</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Terms & Conditions for Bill -->
+              <div class="p-4 rounded-xl bg-neutral-50/90 border border-neutral-200 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-neutral-900 text-white flex items-center justify-center shrink-0">
+                      <i data-lucide="scroll-text" class="w-3.5 h-3.5 text-emerald-400"></i>
+                    </div>
+                    <div>
+                      <div class="text-xs font-bold text-neutral-900">Store Terms & Conditions (Bill Description)</div>
+                      <p class="text-[11px] text-neutral-500">Custom clauses included in customer WhatsApp bills.</p>
+                    </div>
+                  </div>
+                  <label class="flex items-center gap-1.5 cursor-pointer select-none text-xs font-bold text-neutral-800 bg-white px-2.5 py-1 rounded-lg border border-neutral-200">
+                    <input type="checkbox" id="chk_termsConditions" onchange="onBillFieldToggle('termsConditions', this.checked)" class="w-3.5 h-3.5 rounded text-neutral-900 focus:ring-neutral-900 border-neutral-300">
+                    <span>Include on Bill</span>
+                  </label>
+                </div>
+
+                <div>
+                  <textarea 
+                    id="adminBillTerms" 
+                    rows="3" 
+                    oninput="onBillTermsInput(this.value)"
+                    placeholder="Enter store terms and conditions..."
+                    class="w-full px-3 py-2 text-xs text-neutral-900 bg-white rounded-xl border border-neutral-300 focus:border-neutral-900 outline-hidden font-normal leading-relaxed resize-y"
+                  ></textarea>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] text-neutral-500">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="font-semibold text-neutral-600">Quick Templates:</span>
+                    <button type="button" onclick="insertTermsTemplate('apparel')" class="px-2 py-0.5 rounded bg-white border border-neutral-200 hover:bg-neutral-100 text-neutral-700 font-medium transition cursor-pointer">Apparel (7 Days)</button>
+                    <button type="button" onclick="insertTermsTemplate('norefund')" class="px-2 py-0.5 rounded bg-white border border-neutral-200 hover:bg-neutral-100 text-neutral-700 font-medium transition cursor-pointer">Strict No-Refund</button>
+                    <button type="button" onclick="insertTermsTemplate('minimal')" class="px-2 py-0.5 rounded bg-white border border-neutral-200 hover:bg-neutral-100 text-neutral-700 font-medium transition cursor-pointer">Minimal</button>
+                  </div>
+                  <div class="text-[10px] text-neutral-400 font-mono" id="termsCharCount">0 characters</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Product Catalog Manager -->
+          <div class="bg-white rounded-2xl p-5 sm:p-6 border border-neutral-200 shadow-xs">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-700 flex items-center gap-2">
+                <i data-lucide="package" class="w-4 h-4 text-neutral-700"></i>
+                <span>Product Catalog Manager</span>
+              </h2>
+              <span id="adminProductCountBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-neutral-100 text-neutral-700 font-mono">0 Products</span>
+            </div>
+
+            <!-- Add / Edit Product Form -->
+            <div id="adminProductFormBox" class="p-4 rounded-xl bg-neutral-50/90 border border-neutral-200 space-y-3 mb-4 transition-all">
+              <input type="hidden" id="editingProductId" value="" />
+              <div class="flex items-center justify-between">
+                <span id="adminFormTitle" class="text-xs font-bold text-neutral-900">Add New Product</span>
+                <button type="button" id="adminCancelEditBtn" onclick="cancelProductEditing()" class="hidden text-[11px] font-bold text-neutral-500 hover:text-neutral-900 cursor-pointer">
+                  Cancel Edit
+                </button>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-1">Product Name *</label>
+                  <input type="text" id="newProdName" placeholder="e.g. Vintage Polo" class="w-full px-3 py-1.5 text-xs rounded-lg border border-neutral-300 bg-white outline-hidden" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-1">SKU / Code</label>
+                  <input type="text" id="newProdSku" placeholder="e.g. SMP-POLO-09" class="w-full px-3 py-1.5 text-xs font-mono rounded-lg border border-neutral-300 bg-white outline-hidden" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-1">Category</label>
+                  <input type="text" id="newProdCategory" placeholder="e.g. Shirts" class="w-full px-3 py-1.5 text-xs rounded-lg border border-neutral-300 bg-white outline-hidden" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-1">Unit Price (<span id="adminFormCurrencyLabel">&#8377;</span>) *</label>
+                  <input type="number" id="newProdPrice" placeholder="e.g. 1299" class="w-full px-3 py-1.5 text-xs font-mono rounded-lg border border-neutral-300 bg-white outline-hidden" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="sm:col-span-2">
+                  <label class="block text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-1">Available Colors (comma-separated)</label>
+                  <input type="text" id="newProdColors" placeholder="e.g. Black, White, Olive, Navy" class="w-full px-3 py-1.5 text-xs rounded-lg border border-neutral-300 bg-white outline-hidden" />
+                </div>
+                <div>
+                  <label class="block text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-1">Stock Status</label>
+                  <select id="newProdInStock" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-neutral-300 bg-white outline-hidden font-medium">
+                    <option value="true">In Stock (Active)</option>
+                    <option value="false">Out of Stock</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 pt-1">
+                <button type="button" id="adminSaveProdBtn" onclick="saveProductFromAdminForm()" class="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold rounded-lg transition flex items-center gap-1.5 shadow-xs cursor-pointer">
+                  <i data-lucide="plus" class="w-3.5 h-3.5 text-white"></i>
+                  <span id="adminSaveProdBtnText">Add to Catalog</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Product List in Admin -->
+            <div id="adminProductList" class="space-y-2.5 max-h-[340px] overflow-y-auto custom-scrollbar pr-1">
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Live WhatsApp Message Simulator -->
+        <div class="lg:col-span-5 space-y-6">
+          <div class="bg-white rounded-2xl p-5 sm:p-6 border border-neutral-200 shadow-xs">
+            <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-700 mb-3 flex items-center gap-2">
+              <i data-lucide="smartphone" class="w-4 h-4 text-emerald-600"></i>
+              <span>Live WhatsApp Message Preview</span>
+            </h2>
+            <p class="text-xs text-neutral-500 mb-4">This preview simulates exactly how your customer receives the invoice on their phone.</p>
+
+            <div class="rounded-2xl border-4 border-neutral-800 bg-[#EFEAE2] p-2.5 sm:p-4 shadow-inner max-w-full overflow-hidden">
+              <div class="bg-[#075E54] text-white p-2.5 rounded-xl flex items-center gap-2.5 mb-3 shadow-xs">
+                <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-xs shrink-0">S</div>
+                <div class="min-w-0">
+                  <div id="previewSimStoreName" class="text-xs font-bold leading-tight truncate">Simmple Store</div>
+                  <div class="text-[10px] text-emerald-100 flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
+                    <span class="truncate">Official Business Account</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-[#E7FCE3] p-3 sm:p-3.5 rounded-xl rounded-tl-none border border-emerald-200/60 shadow-xs text-[11px] leading-relaxed text-neutral-800 whitespace-pre-wrap break-words [overflow-wrap:anywhere] font-sans max-h-[360px] overflow-y-auto custom-scrollbar" id="simulatedWhatsappText">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ============================================== -->
+  <!-- MODAL: OFFICIAL INVOICE RECEIPT (PRINTABLE)    -->
+  <!-- Has Back, Cross (X), Print, WhatsApp, and New Bill buttons -->
+  <!-- ============================================== -->
+  <div id="receiptModal" onclick="if(event.target === this) closeReceiptModal()" class="hidden fixed inset-0 z-50 overflow-y-auto bg-neutral-900/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full border border-neutral-200 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      <!-- Modal Header with Prominent BACK Button & CROSS (X) Button -->
+      <div class="px-4 sm:px-5 py-3.5 border-b border-neutral-200 flex items-center justify-between bg-neutral-50 no-print">
+        <div class="flex items-center gap-2 sm:gap-3">
+          <button type="button" onclick="closeReceiptModal()" class="px-2.5 py-1.5 rounded-xl bg-white border border-neutral-300 hover:bg-neutral-100 text-neutral-800 transition flex items-center gap-1.5 text-xs font-bold cursor-pointer shadow-2xs" title="Back / Close Popup">
+            <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+            <span>Back</span>
+          </button>
+          <div class="h-4 w-px bg-neutral-300"></div>
+          <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
+            <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+            <span class="font-bold text-xs sm:text-sm text-neutral-900 truncate">Customer Invoice Receipt</span>
+          </div>
+        </div>
+
+        <!-- Prominent Cross (X) Close Button -->
+        <button type="button" onclick="closeReceiptModal()" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-neutral-200/90 text-neutral-800 hover:bg-red-100 hover:text-red-700 hover:border-red-300 border border-neutral-300 transition flex items-center justify-center font-bold text-sm cursor-pointer shadow-2xs" title="Close Popup (✕)">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Printable Receipt Body -->
+      <div id="printableReceipt" class="p-6 overflow-y-auto custom-scrollbar bg-white text-neutral-900 space-y-5">
+        <!-- Store Header -->
+        <div class="text-center border-b border-dashed border-neutral-300 pb-4">
+          <h2 id="receiptStoreName" class="text-2xl font-black tracking-tight text-neutral-900">SIMMPLE</h2>
+          <p id="receiptTagline" class="text-xs text-neutral-500 mt-0.5">Minimalist Essentials & Contemporary Apparel</p>
+          <p id="receiptAddress" class="text-[11px] text-neutral-400 mt-1 max-w-xs mx-auto">Shop 14, High Street Arcade, Fashion Avenue, Mumbai</p>
+        </div>
+
+        <!-- Receipt Meta -->
+        <div class="grid grid-cols-2 gap-3 text-xs border-b border-neutral-100 pb-3">
+          <div>
+            <div class="text-neutral-400 text-[10px] font-semibold uppercase">Invoice Number</div>
+            <div id="receiptInvoiceNo" class="font-mono font-bold text-neutral-900 text-sm">SMP-2026-0001</div>
+            <div class="text-neutral-400 text-[10px] font-semibold uppercase mt-2">Date & Time</div>
+            <div id="receiptDate" class="text-neutral-700">Today</div>
+          </div>
+          <div class="text-right">
+            <div class="text-neutral-400 text-[10px] font-semibold uppercase">Billed To</div>
+            <div id="receiptCustomerName" class="font-bold text-neutral-900 text-sm">Customer Name</div>
+            <div id="receiptCustomerPhone" class="text-neutral-600 font-mono mt-0.5">+91 9876543210</div>
+            <div id="receiptPaymentBadge" class="inline-block mt-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-neutral-900 text-white">Online (Paid)</div>
+          </div>
+        </div>
+
+        <!-- Items Table -->
+        <div>
+          <div class="text-[11px] font-bold uppercase tracking-wider text-neutral-400 mb-2">Order Items</div>
+          <div class="border rounded-xl border-neutral-200 overflow-hidden">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-neutral-50 text-[10px] uppercase font-bold text-neutral-500 border-b border-neutral-200">
+                <tr>
+                  <th class="p-2.5">Item & Color</th>
+                  <th class="p-2.5 text-center">Qty</th>
+                  <th class="p-2.5 text-right">Price</th>
+                  <th class="p-2.5 text-right">Disc</th>
+                  <th class="p-2.5 text-right">Total</th>
+                </tr>
+              </thead>
+              <tbody id="receiptItemsBody" class="divide-y divide-neutral-100">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Calculations -->
+        <div class="border-t border-dashed border-neutral-300 pt-3 space-y-1.5 text-xs">
+          <div class="flex justify-between text-neutral-600">
+            <span>Sub Total:</span>
+            <span id="receiptSubtotal" class="font-mono font-semibold">&#8377;0</span>
+          </div>
+          <div class="flex justify-between text-emerald-700 font-medium">
+            <span>Total Discount Given:</span>
+            <span id="receiptTotalDiscount" class="font-mono font-bold">-&#8377;0</span>
+          </div>
+          <div id="receiptTaxRow" class="hidden flex justify-between text-neutral-600">
+            <span id="receiptTaxLabel">GST:</span>
+            <span id="receiptTaxAmount" class="font-mono">&#8377;0</span>
+          </div>
+          <div class="pt-2 border-t border-neutral-900 flex justify-between items-baseline">
+            <span class="text-sm font-extrabold text-neutral-900 uppercase">Final Total:</span>
+            <span id="receiptFinalTotal" class="text-xl font-extrabold font-mono text-neutral-950">&#8377;0</span>
+          </div>
+        </div>
+
+        <!-- Terms & Conditions on Receipt -->
+        <div id="receiptTermsContainer" class="pt-3 border-t border-dashed border-neutral-300 text-left text-[10px]">
+          <div class="font-bold text-neutral-800 uppercase tracking-wider text-[9px] mb-1.5 flex items-center gap-1.5">
+            <i data-lucide="scroll-text" class="w-3 h-3 text-neutral-600"></i>
+            <span>Terms & Conditions:</span>
+          </div>
+          <div id="receiptTermsContent" class="text-neutral-600 leading-relaxed whitespace-pre-line bg-neutral-50 p-2.5 rounded-xl border border-neutral-200 font-sans"></div>
+        </div>
+
+        <!-- Footer / Policy -->
+        <div class="text-center pt-2 border-t border-neutral-100 text-[10px] text-neutral-400 space-y-1">
+          <p id="receiptFooterPolicy">Thank you for shopping at Simmple! Garments once sold can be exchanged within 7 days in original condition with invoice.</p>
+          <p id="receiptStoreContact" class="font-mono text-neutral-600">Store Contact: +91 98765 43210</p>
+        </div>
+      </div>
+
+      <!-- Modal Actions (No-print) with Close / Back and New Bill -->
+      <div class="p-3.5 sm:p-4 bg-neutral-50 border-t border-neutral-200 flex flex-col sm:flex-row gap-2.5 justify-between items-stretch sm:items-center no-print">
+        <!-- Close / Back Button in Footer -->
+        <button onclick="closeReceiptModal()" class="px-4 py-2 rounded-xl bg-neutral-200 hover:bg-neutral-300 text-neutral-800 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer" title="Dismiss invoice popup">
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          <span>Close / Back</span>
+        </button>
+
+        <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-end">
+          <button onclick="copyReceiptText()" class="flex-1 sm:flex-none px-3 py-2 rounded-xl bg-white border border-neutral-200 hover:bg-neutral-100 text-xs font-semibold text-neutral-700 transition flex items-center justify-center gap-1.5 cursor-pointer">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            <span>Copy</span>
+          </button>
+          <button onclick="printReceipt()" class="flex-1 sm:flex-none px-3 py-2 rounded-xl bg-white border border-neutral-200 hover:bg-neutral-100 text-xs font-semibold text-neutral-700 transition flex items-center justify-center gap-1.5 cursor-pointer">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+            <span>Print</span>
+          </button>
+          <button id="modalSendWhatsappBtn" onclick="resendCurrentReceiptWhatsApp()" class="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer">
+            <i data-lucide="send" class="w-3.5 h-3.5"></i>
+            <span>WhatsApp</span>
+          </button>
+          <button onclick="startNewBillFromModal()" class="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>New Bill</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SAFE DELETE CONFIRMATION -->
+  <div id="deleteConfirmModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-neutral-900/70 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full border border-neutral-200 shadow-2xl p-6 space-y-4">
+      <div class="flex items-start gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center shrink-0">
+          <i data-lucide="trash-2" class="w-5 h-5"></i>
+        </div>
+        <div class="flex-1">
+          <h3 id="deleteModalTitle" class="text-base font-bold text-neutral-900">Delete Record</h3>
+          <p id="deleteModalSubtitle" class="text-xs text-neutral-500 mt-0.5">This action will remove the record.</p>
+        </div>
+        <button onclick="closeDeleteModal()" class="text-neutral-400 hover:text-neutral-700 p-1 rounded-lg">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div id="deleteModalContent" class="p-3.5 rounded-2xl bg-neutral-50 border border-neutral-200 text-xs space-y-1.5">
+      </div>
+
+      <div class="flex items-center justify-end gap-2.5 pt-2">
+        <button onclick="closeDeleteModal()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-neutral-600 hover:bg-neutral-100 transition cursor-pointer">
+          Cancel
+        </button>
+        <button id="deleteModalConfirmBtn" onclick="executeDeleteAction()" class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm cursor-pointer">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          <span id="deleteModalConfirmText">Yes, Delete</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: OWNER LOGIN PIN LOCK -->
+  <div id="loginModal" class="hidden fixed inset-0 z-50 bg-neutral-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 sm:p-8 border border-neutral-200 shadow-2xl text-center">
+      <div class="w-14 h-14 rounded-2xl bg-neutral-900 text-white mx-auto flex items-center justify-center font-extrabold text-2xl shadow-lg mb-4">
+        S
+      </div>
+      <h3 class="text-lg font-bold text-neutral-900">Simmple Store Lock</h3>
+      <p class="text-xs text-neutral-500 mt-1 mb-6">Enter owner PIN to access billing & store administration.</p>
+
+      <div class="space-y-4">
+        <input type="password" id="loginPinInput" maxlength="6" placeholder="****" class="w-full text-center text-2xl tracking-[0.5em] font-mono py-3 px-4 rounded-2xl border-2 border-neutral-200 focus:border-neutral-900 outline-hidden transition" />
+        <div id="loginErrorMsg" class="hidden text-xs font-semibold text-red-500">Incorrect PIN. Please try again.</div>
+
+        <button onclick="attemptOwnerLogin()" class="w-full py-3 bg-neutral-900 hover:bg-neutral-800 text-white font-bold text-sm rounded-xl transition shadow-xs cursor-pointer">
+          Unlock POS
+        </button>
+
+        <button onclick="quickTestLogin()" class="text-xs text-neutral-400 hover:text-neutral-700 underline font-medium cursor-pointer">
+          Quick Owner Login (PIN: 1234)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 pointer-events-none space-y-2"></div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    const DEFAULT_BILL_FIELDS = {
+      storeHeader: true,
+      tagline: true,
+      storeAddress: true,
+      storeContact: true,
+      storeUpi: true,
+      invoiceNo: true,
+      date: true,
+      customerName: true,
+      customerWhatsapp: true,
+      paymentMode: true,
+      itemsList: true,
+      itemColor: true,
+      itemPricing: true,
+      itemDiscount: true,
+      subtotal: true,
+      totalDiscount: true,
+      finalTotal: true,
+      termsConditions: true,
+      footerPolicy: true,
+      closingGreeting: true
+    };
+
+    const DEFAULT_STORE_SETTINGS = {
+      storeName: 'Simmple',
+      tagline: 'Minimalist Essentials & Contemporary Apparel',
+      storeWhatsapp: '+91 98765 43210',
+      storePhone: '+91 98765 43210',
+      storeEmail: 'contact@simmplestore.com',
+      storeAddress: 'Shop 14, High Street Arcade, Fashion Avenue, Mumbai 400050',
+      currency: '\u20B9',
+      invoicePrefix: 'SMP-',
+      nextInvoiceNumber: 1,
+      taxEnabled: false,
+      taxRate: 0,
+      taxLabel: 'GST',
+      upiId: 'simmple.store@okaxis',
+      termsAndConditions: '1. Goods once sold can be exchanged within 7 days in original unworn condition with tags attached.\n2. Original tax invoice is required for all exchanges.\n3. No cash refunds; exchange or store credit provided.\n4. Altered, washed, or discounted items cannot be returned.',
+      customFooter: 'Thank you for shopping at Simmple! Garments once sold can be exchanged within 7 days in original condition with invoice.',
+      ownerPin: '1234',
+      billFields: { ...DEFAULT_BILL_FIELDS }
+    };
+
+    const INITIAL_PRODUCTS = [
+      { id: 'prod-1', name: 'Simmple Heavyweight Oversized Tee', sku: 'SMP-TEE-01', category: 'T-Shirts', price: 899, colors: ['Jet Black', 'Cloud White', 'Sage Green', 'Charcoal Grey', 'Oatmeal'], inStock: true },
+      { id: 'prod-2', name: 'Simmple Relaxed Linen Shirt', sku: 'SMP-SHIRT-02', category: 'Shirts', price: 1499, colors: ['Pure White', 'Dusty Olive', 'Sand Beige', 'Midnight Navy'], inStock: true },
+      { id: 'prod-3', name: 'Simmple Pleated Straight Trouser', sku: 'SMP-TR-03', category: 'Trousers', price: 1899, colors: ['Classic Black', 'Oat Khaki', 'Deep Charcoal', 'Mocha Brown'], inStock: true },
+      { id: 'prod-4', name: 'Simmple French Terry Boxy Hoodie', sku: 'SMP-HD-04', category: 'Outerwear', price: 2199, colors: ['Washed Black', 'Heather Grey', 'Clay Brown', 'Bone White'], inStock: true },
+      { id: 'prod-5', name: 'Simmple Wide Leg Raw Denim', sku: 'SMP-DNM-05', category: 'Bottoms', price: 2499, colors: ['Deep Indigo', 'Vintage Wash', 'Washed Black'], inStock: true },
+      { id: 'prod-6', name: 'Simmple Canvas Everyday Tote', sku: 'SMP-ACC-06', category: 'Accessories', price: 599, colors: ['Natural Ecru', 'Forest Green', 'Matte Black'], inStock: true }
+    ];
+
+    function loadFromStorage(key, defaultVal) {
+      try {
+        const item = localStorage.getItem(key);
+        return item ? JSON.parse(item) : defaultVal;
+      } catch (e) {
+        return defaultVal;
+      }
+    }
+
+    function saveToStorage(key, val) {
+      try {
+        localStorage.setItem(key, JSON.stringify(val));
+      } catch (e) {}
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    let state = {
+      isAuthenticated: loadFromStorage('simmple_auth', true),
+      activeTab: 'billing',
+      settings: loadFromStorage('simmple_settings', DEFAULT_STORE_SETTINGS),
+      products: loadFromStorage('simmple_products', INITIAL_PRODUCTS),
+      invoices: loadFromStorage('simmple_invoices', []),
+      pos: {
+        selectedProductId: '',
+        selectedColor: '',
+        qty: 1,
+        discount: 0,
+        discountType: 'flat',
+        customerPhone: '',
+        customerName: '',
+        countryCode: '+91',
+        paymentMode: 'Online',
+        cart: []
+      },
+      invoiceFilter: 'All',
+      activeReceiptInvoice: null,
+      pendingDelete: null,
+      editingProductId: null
+    };
+
+    function safeCreateIcons() {
+      if (typeof lucide !== 'undefined' && typeof lucide.createIcons === 'function') {
+        try {
+          lucide.createIcons();
+        } catch (e) {}
+      }
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      const bg = type === 'success' ? 'bg-neutral-900 text-white' : type === 'error' ? 'bg-red-600 text-white' : 'bg-neutral-800 text-white';
+      toast.className = `${bg} px-4 py-2.5 rounded-xl shadow-lg text-xs font-semibold flex items-center gap-2 transform transition-all duration-300 translate-y-2 opacity-0 pointer-events-auto`;
+      toast.innerHTML = `<span>${message}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
+      setTimeout(() => {
+        toast.classList.add('translate-y-2', 'opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      }, 2600);
+    }
+
+    function checkAuthOnLoad() {
+      const modal = document.getElementById('loginModal');
+      if (!state.isAuthenticated) {
+        modal.classList.remove('hidden');
+        document.getElementById('loginPinInput').focus();
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+
+    function attemptOwnerLogin() {
+      const enteredPin = (document.getElementById('loginPinInput').value || '').trim();
+      const validPin = (state.settings.ownerPin || '1234').trim();
+      if (enteredPin === validPin) {
+        state.isAuthenticated = true;
+        saveToStorage('simmple_auth', true);
+        document.getElementById('loginModal').classList.add('hidden');
+        document.getElementById('loginErrorMsg').classList.add('hidden');
+        document.getElementById('loginPinInput').value = '';
+        showToast('Store unlocked', 'success');
+      } else {
+        document.getElementById('loginErrorMsg').classList.remove('hidden');
+      }
+    }
+
+    function quickTestLogin() {
+      state.isAuthenticated = true;
+      saveToStorage('simmple_auth', true);
+      document.getElementById('loginModal').classList.add('hidden');
+      document.getElementById('loginErrorMsg').classList.add('hidden');
+      showToast('Unlocked as Store Owner', 'success');
+    }
+
+    function logoutOwner() {
+      state.isAuthenticated = false;
+      saveToStorage('simmple_auth', false);
+      checkAuthOnLoad();
+      showToast('POS locked', 'info');
+    }
+
+    document.getElementById('loginPinInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') attemptOwnerLogin();
+    });
+
+    // Close modals on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeReceiptModal();
+        closeDeleteModal();
+      }
+    });
+
+    function switchTab(tab) {
+      state.activeTab = tab;
+      const tabs = ['billing', 'invoices', 'admin'];
+      tabs.forEach(t => {
+        const view = document.getElementById('view' + t.charAt(0).toUpperCase() + t.slice(1));
+        const btn = document.getElementById('tabBtn' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (t === tab) {
+          view.classList.remove('hidden');
+          btn.className = 'px-2 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-1.5 bg-white text-neutral-900 shadow-xs cursor-pointer';
+        } else {
+          view.classList.add('hidden');
+          btn.className = 'px-2 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center justify-center gap-1.5 text-neutral-600 hover:text-neutral-900 cursor-pointer';
+        }
+      });
+      if (tab === 'invoices') renderInvoicesList();
+      if (tab === 'admin') populateAdminFields();
+      safeCreateIcons();
+    }
+
+    function initBillingPOS() {
+      populateProductSelect();
+      updateInvoiceCounters();
+      updateCartDisplay();
+    }
+
+    function updateInvoiceCounters() {
+      const prefix = state.settings.invoicePrefix || 'SMP-';
+      const year = new Date().getFullYear();
+      const seq = state.settings.nextInvoiceNumber || 1;
+      document.getElementById('displayNextInvoiceNo').textContent = `${prefix}${year}-${String(seq).padStart(4, '0')}`;
+      document.getElementById('invoicesCountBadge').textContent = state.invoices.length;
+    }
+
+    function populateProductSelect() {
+      const select = document.getElementById('selectProduct');
+      select.innerHTML = '';
+      state.products.filter(p => p.inStock).forEach(prod => {
+        const opt = document.createElement('option');
+        opt.value = prod.id;
+        opt.textContent = `${prod.name} - ${state.settings.currency || '\u20B9'}${prod.price.toLocaleString()} (${prod.category})`;
+        select.appendChild(opt);
+      });
+      if (state.products.length > 0) {
+        state.pos.selectedProductId = state.products[0].id;
+        onProductSelectChange();
+      }
+    }
+
+    function onProductSelectChange() {
+      const prodId = document.getElementById('selectProduct').value;
+      state.pos.selectedProductId = prodId;
+      const product = state.products.find(p => p.id === prodId);
+      if (!product) return;
+
+      document.getElementById('productCategoryBadge').textContent = product.category;
+      const colorsContainer = document.getElementById('colorVariantsContainer');
+      colorsContainer.innerHTML = '';
+      const availableColors = product.colors || ['Standard'];
+      state.pos.selectedColor = availableColors[0];
+      document.getElementById('selectedColorDisplay').textContent = state.pos.selectedColor;
+
+      availableColors.forEach(c => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        const isSelected = c === state.pos.selectedColor;
+        btn.className = `px-3 py-1.5 text-xs font-semibold rounded-lg transition border cursor-pointer ${isSelected ? 'bg-neutral-900 text-white border-neutral-900' : 'bg-neutral-50 text-neutral-700 border-neutral-200 hover:bg-neutral-100'}`;
+        btn.textContent = c;
+        btn.onclick = () => {
+          state.pos.selectedColor = c;
+          document.getElementById('selectedColorDisplay').textContent = c;
+          colorsContainer.querySelectorAll('button').forEach(b => {
+            const sel = b.textContent === c;
+            b.className = `px-3 py-1.5 text-xs font-semibold rounded-lg transition border cursor-pointer ${sel ? 'bg-neutral-900 text-white border-neutral-900' : 'bg-neutral-50 text-neutral-700 border-neutral-200 hover:bg-neutral-100'}`;
+          });
+        };
+        colorsContainer.appendChild(btn);
+      });
+      calculateLineItemPreview();
+    }
+
+    function applyCustomColor() {
+      const custom = document.getElementById('inputCustomColor').value.trim();
+      if (custom) {
+        state.pos.selectedColor = custom;
+        document.getElementById('selectedColorDisplay').textContent = custom;
+        showToast(`Color set to "${custom}"`, 'info');
+      }
+    }
+
+    function adjustQty(delta) {
+      const qtyInput = document.getElementById('inputQty');
+      let val = parseInt(qtyInput.value) || 1;
+      val = Math.max(1, val + delta);
+      qtyInput.value = val;
+      state.pos.qty = val;
+      calculateLineItemPreview();
+    }
+
+    function setDiscountType(type) {
+      state.pos.discountType = type;
+      const btnFlat = document.getElementById('discountTypeFlat');
+      const btnPercent = document.getElementById('discountTypePercent');
+      const unitSpan = document.getElementById('discountTypeUnit');
+      if (type === 'flat') {
+        btnFlat.className = 'px-2 py-0.5 rounded bg-white text-neutral-900 shadow-xs';
+        btnPercent.className = 'px-2 py-0.5 rounded text-neutral-500';
+        unitSpan.textContent = state.settings.currency || '\u20B9';
+      } else {
+        btnPercent.className = 'px-2 py-0.5 rounded bg-white text-neutral-900 shadow-xs';
+        btnFlat.className = 'px-2 py-0.5 rounded text-neutral-500';
+        unitSpan.textContent = '%';
+      }
+      calculateLineItemPreview();
+    }
+
+    function calculateLineItemPreview() {
+      const product = state.products.find(p => p.id === state.pos.selectedProductId);
+      if (!product) return;
+      const qty = parseInt(document.getElementById('inputQty').value) || 1;
+      const rawDisc = parseFloat(document.getElementById('inputItemDiscount').value) || 0;
+      const subtotal = product.price * qty;
+      let discAmt = state.pos.discountType === 'flat' ? rawDisc * qty : Math.round((subtotal * rawDisc) / 100);
+      discAmt = Math.min(discAmt, subtotal);
+      const total = subtotal - discAmt;
+
+      document.getElementById('previewLineTotal').textContent = `${state.settings.currency || '\u20B9'}${total.toLocaleString()}`;
+      const discBadge = document.getElementById('previewDiscountBadge');
+      if (discAmt > 0) {
+        discBadge.textContent = `Discount: -${state.settings.currency || '\u20B9'}${discAmt.toLocaleString()}`;
+        discBadge.className = 'text-[11px] text-emerald-600 font-bold';
+      } else {
+        discBadge.textContent = 'No discount';
+        discBadge.className = 'text-[11px] text-neutral-400 font-medium';
+      }
+    }
+
+    function setPaymentMode(mode) {
+      state.pos.paymentMode = mode;
+      const modes = ['Online', 'Offline', 'Payment Pending'];
+      modes.forEach(m => {
+        const btn = document.getElementById(m === 'Online' ? 'payModeOnline' : m === 'Offline' ? 'payModeOffline' : 'payModePending');
+        if (btn) {
+          if (m === mode) {
+            btn.className = 'p-2 sm:p-2.5 rounded-xl border-2 border-neutral-900 bg-neutral-900 text-white text-xs font-bold text-center transition flex flex-col items-center gap-1 shadow-xs cursor-pointer';
+          } else {
+            btn.className = 'p-2 sm:p-2.5 rounded-xl border-2 border-neutral-200 hover:border-neutral-300 bg-white text-neutral-700 text-xs font-medium text-center transition flex flex-col items-center gap-1 cursor-pointer';
+          }
+        }
+      });
+    }
+
+    function addItemToCart() {
+      const product = state.products.find(p => p.id === state.pos.selectedProductId);
+      if (!product) return;
+
+      const qty = parseInt(document.getElementById('inputQty').value) || 1;
+      const rawDisc = parseFloat(document.getElementById('inputItemDiscount').value) || 0;
+      const color = state.pos.selectedColor || 'Standard';
+      const subtotal = product.price * qty;
+      let discAmt = state.pos.discountType === 'flat' ? rawDisc * qty : Math.round((subtotal * rawDisc) / 100);
+      discAmt = Math.min(discAmt, subtotal);
+      const total = subtotal - discAmt;
+
+      state.pos.cart.push({
+        id: 'cart-' + Date.now(),
+        productId: product.id,
+        productName: product.name,
+        sku: product.sku,
+        color: color,
+        unitPrice: product.price,
+        qty: qty,
+        discountAmount: discAmt,
+        subtotal: subtotal,
+        total: total
+      });
+
+      updateCartDisplay();
+      showToast(`Added "${product.name}"`, 'success');
+      document.getElementById('inputQty').value = 1;
+      document.getElementById('inputItemDiscount').value = 0;
+      calculateLineItemPreview();
+    }
+
+    function removeCartItem(itemId) {
+      state.pos.cart = state.pos.cart.filter(item => item.id !== itemId);
+      updateCartDisplay();
+    }
+
+    function updateCartItemQty(itemId, delta) {
+      const item = state.pos.cart.find(i => i.id === itemId);
+      if (!item) return;
+      const newQty = item.qty + delta;
+      if (newQty <= 0) {
+        removeCartItem(itemId);
+        return;
+      }
+      item.qty = newQty;
+      item.subtotal = item.unitPrice * newQty;
+      item.total = item.subtotal - (item.discountAmount || 0);
+      updateCartDisplay();
+    }
+
+    function updateCartDisplay() {
+      const container = document.getElementById('cartItemsList');
+      const countPill = document.getElementById('cartCountPill');
+      const currency = state.settings.currency || '\u20B9';
+
+      if (state.pos.cart.length === 0) {
+        countPill.textContent = '0 items';
+        container.innerHTML = `
+          <div class="py-10 text-center text-neutral-400">
+            <i data-lucide="shopping-bag" class="w-9 h-9 mx-auto mb-2 opacity-30"></i>
+            <p class="text-xs font-medium">No items added to bill yet.</p>
+          </div>
+        `;
+        safeCreateIcons();
+        updateBillTotals();
+        return;
+      }
+
+      const totalPcs = state.pos.cart.reduce((sum, it) => sum + it.qty, 0);
+      countPill.textContent = `${state.pos.cart.length} items (${totalPcs} pcs)`;
+
+      let html = '';
+      state.pos.cart.forEach(it => {
+        html += `
+          <div class="py-3 flex items-start justify-between gap-2">
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-xs text-neutral-900 truncate">${it.productName}</div>
+              <div class="flex items-center gap-1.5 mt-0.5">
+                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-700 border border-neutral-200">${it.color}</span>
+              </div>
+              <div class="flex items-center gap-2 mt-1.5">
+                <div class="flex items-center rounded-md border border-neutral-200 bg-neutral-50 px-1 py-0.5">
+                  <button onclick="updateCartItemQty('${it.id}', -1)" class="w-5 h-5 flex items-center justify-center text-neutral-600 font-bold">-</button>
+                  <span class="px-2 text-xs font-mono font-bold">${it.qty}</span>
+                  <button onclick="updateCartItemQty('${it.id}', 1)" class="w-5 h-5 flex items-center justify-center text-neutral-600 font-bold">+</button>
+                </div>
+                <span class="text-xs text-neutral-500 font-mono">x ${currency}${it.unitPrice.toLocaleString()}</span>
+              </div>
+            </div>
+            <div class="text-right flex flex-col items-end">
+              <span class="text-xs font-bold font-mono text-neutral-900">${currency}${it.total.toLocaleString()}</span>
+              <button onclick="removeCartItem('${it.id}')" class="text-neutral-400 hover:text-red-600 p-1 mt-1 cursor-pointer">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+      safeCreateIcons();
+      updateBillTotals();
+    }
+
+    function updateBillTotals() {
+      const currency = state.settings.currency || '\u20B9';
+      const subtotal = state.pos.cart.reduce((sum, it) => sum + it.subtotal, 0);
+      const totalDiscount = state.pos.cart.reduce((sum, it) => sum + (it.discountAmount || 0), 0);
+      const finalTotal = subtotal - totalDiscount;
+
+      document.getElementById('billSubtotal').textContent = `${currency}${subtotal.toLocaleString()}`;
+      document.getElementById('billTotalDiscount').textContent = totalDiscount > 0 ? `-${currency}${totalDiscount.toLocaleString()}` : `${currency}0`;
+      document.getElementById('billFinalTotal').textContent = `${currency}${finalTotal.toLocaleString()}`;
+    }
+
+    function resetBillForm() {
+      state.pos.cart = [];
+      document.getElementById('inputCustomerPhone').value = '';
+      document.getElementById('inputCustomerName').value = '';
+      updateCartDisplay();
+      showToast('Bill cleared', 'info');
+    }
+
+    function sanitizePhone(phone, countryCode = '+91') {
+      let cleaned = (phone || '').replace(/[^\d+]/g, '');
+      if (cleaned.startsWith('+')) cleaned = cleaned.substring(1);
+      const ccDigits = countryCode.replace(/[^\d]/g, '');
+      if (cleaned.startsWith(ccDigits)) return cleaned;
+      if (cleaned.startsWith('0')) cleaned = cleaned.substring(1);
+      return `${ccDigits}${cleaned}`;
+    }
+
+    function formatWhatsAppInvoiceMessage(invoice, settings) {
+      const f = settings.billFields || DEFAULT_BILL_FIELDS;
+      const currency = settings.currency || '\u20B9';
+      const storeName = settings.storeName || 'Simmple';
+      const lines = [];
+
+      // Header Branding
+      if (f.storeHeader !== false) {
+        lines.push(`🧾 *${storeName.toUpperCase()} - OFFICIAL INVOICE*`);
+      }
+      if (f.tagline !== false && settings.tagline) {
+        lines.push(`_${settings.tagline}_`);
+      }
+      if (f.storeAddress !== false && settings.storeAddress) {
+        lines.push(`📍 ${settings.storeAddress}`);
+      }
+
+      // Customer & Invoice Details
+      const metaLines = [];
+      if (f.invoiceNo !== false) metaLines.push(`*Invoice No:* ${invoice.invoiceNo}`);
+      if (f.date !== false) metaLines.push(`*Date:* ${invoice.formattedDate}`);
+      if (f.customerName !== false) metaLines.push(`*Customer:* ${invoice.customerName}`);
+      if (f.customerWhatsapp !== false) metaLines.push(`*Phone:* ${invoice.countryCode} ${invoice.customerWhatsapp}`);
+      if (f.paymentMode !== false) {
+        const paymentBadge = invoice.paymentMode === 'Online' ? 'Online (Paid) ✅' : invoice.paymentMode === 'Offline' ? 'Offline (Paid) 💵' : 'Payment Pending ⏳';
+        metaLines.push(`*Payment:* ${paymentBadge}`);
+      }
+
+      if (metaLines.length > 0) {
+        if (lines.length > 0) lines.push('--------------------------------');
+        lines.push(...metaLines);
+      }
+
+      // Items List
+      if (f.itemsList !== false && invoice.items && invoice.items.length > 0) {
+        lines.push('--------------------------------');
+        lines.push('*ORDER ITEMS:*');
+        invoice.items.forEach((it, idx) => {
+          let itemLine = `${idx + 1}. *${it.productName}*`;
+          if (f.itemColor !== false && it.color) {
+            itemLine += ` (${it.color})`;
+          }
+          lines.push(itemLine);
+
+          if (f.itemPricing !== false) {
+            let mathLine = `   Qty: ${it.qty} x ${currency}${it.unitPrice.toLocaleString()}`;
+            if (f.itemDiscount !== false && it.discountAmount > 0) {
+              mathLine += ` (Disc: -${currency}${it.discountAmount})`;
+            }
+            mathLine += ` = *${currency}${it.total.toLocaleString()}*`;
+            lines.push(mathLine);
+          }
+        });
+      }
+
+      // Totals Section
+      const totalLines = [];
+      if (f.subtotal !== false) totalLines.push(`*Sub Total:* ${currency}${invoice.subtotal.toLocaleString()}`);
+      if (f.totalDiscount !== false && invoice.totalDiscount > 0) totalLines.push(`*Discount Given:* -${currency}${invoice.totalDiscount.toLocaleString()}`);
+      if (f.finalTotal !== false) totalLines.push(`*FINAL TOTAL:* ${currency}${invoice.finalTotal.toLocaleString()}`);
+
+      if (totalLines.length > 0) {
+        lines.push('--------------------------------');
+        lines.push(...totalLines);
+      }
+
+      // Store UPI for payments
+      if (f.storeUpi !== false && settings.upiId) {
+        lines.push('--------------------------------');
+        lines.push(`💳 *Pay via UPI ID:* \`${settings.upiId}\``);
+      }
+
+      // Terms & Conditions
+      if (f.termsConditions !== false && settings.termsAndConditions) {
+        lines.push('--------------------------------');
+        lines.push(`📋 *Terms & Conditions:*\n${settings.termsAndConditions}`);
+      }
+
+      // Footer Notes & Policies
+      if (f.footerPolicy !== false && settings.customFooter) {
+        lines.push('--------------------------------');
+        lines.push(`${settings.customFooter}`);
+      }
+
+      // Store Contact & Closing Greeting
+      const footerContacts = [];
+      if (f.storeContact !== false) {
+        const contactInfo = settings.storeWhatsapp || settings.storePhone || '';
+        if (contactInfo) footerContacts.push(`Store Contact: ${contactInfo}`);
+      }
+      if (f.closingGreeting !== false) {
+        footerContacts.push(`Thank you for shopping with us! ✨`);
+      }
+
+      if (footerContacts.length > 0) {
+        if (!lines[lines.length - 1].startsWith('---')) lines.push('--------------------------------');
+        lines.push(footerContacts.join('\n'));
+      }
+
+      return lines.join('\n');
+    }
+
+    function openWhatsAppUrl(phone, countryCode, text) {
+      const cleanPhone = sanitizePhone(phone, countryCode);
+      const url = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(text)}`;
+      window.open(url, '_blank');
+    }
+
+    function createInvoiceFromPOS() {
+      const customerPhone = document.getElementById('inputCustomerPhone').value.trim();
+      const customerName = document.getElementById('inputCustomerName').value.trim();
+      const countryCode = document.getElementById('inputCountryCode').value;
+
+      if (!customerPhone) {
+        showToast('Please enter customer phone number', 'error');
+        return null;
+      }
+      if (!customerName) {
+        showToast('Please enter customer name', 'error');
+        return null;
+      }
+      if (state.pos.cart.length === 0) {
+        showToast('Please add at least 1 item to bill', 'error');
+        return null;
+      }
+
+      const prefix = state.settings.invoicePrefix || 'SMP-';
+      const year = new Date().getFullYear();
+      const seq = state.settings.nextInvoiceNumber || 1;
+      const invoiceNo = `${prefix}${year}-${String(seq).padStart(4, '0')}`;
+
+      const subtotal = state.pos.cart.reduce((sum, it) => sum + it.subtotal, 0);
+      const totalDiscount = state.pos.cart.reduce((sum, it) => sum + (it.discountAmount || 0), 0);
+      const finalTotal = subtotal - totalDiscount;
+
+      const now = new Date();
+      const formattedDate = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ', ' +
+        now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+      return {
+        id: 'inv-' + Date.now(),
+        invoiceNo: invoiceNo,
+        formattedDate: formattedDate,
+        customerName: customerName,
+        customerWhatsapp: customerPhone,
+        countryCode: countryCode,
+        paymentMode: state.pos.paymentMode,
+        items: [...state.pos.cart],
+        subtotal: subtotal,
+        totalDiscount: totalDiscount,
+        finalTotal: finalTotal,
+        status: state.pos.paymentMode === 'Payment Pending' ? 'pending' : 'paid'
+      };
+    }
+
+    function generateAndSendWhatsApp() {
+      const invoice = createInvoiceFromPOS();
+      if (!invoice) return;
+
+      state.invoices.unshift(invoice);
+      saveToStorage('simmple_invoices', state.invoices);
+
+      state.settings.nextInvoiceNumber = (state.settings.nextInvoiceNumber || 1) + 1;
+      saveToStorage('simmple_settings', state.settings);
+      updateInvoiceCounters();
+
+      const msg = formatWhatsAppInvoiceMessage(invoice, state.settings);
+      openWhatsAppUrl(invoice.customerWhatsapp, invoice.countryCode, msg);
+      showToast(`Bill generated & sent to WhatsApp`, 'success');
+      openReceiptModal(invoice);
+    }
+
+    function previewInvoiceModal() {
+      const invoice = createInvoiceFromPOS();
+      if (!invoice) return;
+      openReceiptModal(invoice);
+    }
+
+    function openReceiptModal(invoice) {
+      state.activeReceiptInvoice = invoice;
+      const currency = state.settings.currency || '\u20B9';
+
+      document.getElementById('receiptStoreName').textContent = (state.settings.storeName || 'SIMMPLE').toUpperCase();
+      document.getElementById('receiptTagline').textContent = state.settings.tagline || '';
+      document.getElementById('receiptAddress').textContent = state.settings.storeAddress || '';
+      document.getElementById('receiptInvoiceNo').textContent = invoice.invoiceNo;
+      document.getElementById('receiptDate').textContent = invoice.formattedDate;
+      document.getElementById('receiptCustomerName').textContent = invoice.customerName;
+      document.getElementById('receiptCustomerPhone').textContent = `${invoice.countryCode} ${invoice.customerWhatsapp}`;
+
+      const badge = document.getElementById('receiptPaymentBadge');
+      badge.textContent = invoice.paymentMode === 'Online' ? 'Online (Paid) ✅' : invoice.paymentMode === 'Offline' ? 'Offline (Paid) 💵' : 'Payment Pending ⏳';
+
+      const tbody = document.getElementById('receiptItemsBody');
+      tbody.innerHTML = '';
+      invoice.items.forEach(it => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="p-2.5">
+            <div class="font-bold text-neutral-900">${it.productName}</div>
+            <div class="text-[10px] text-neutral-500">Color: ${it.color}</div>
+          </td>
+          <td class="p-2.5 text-center font-mono font-bold">${it.qty}</td>
+          <td class="p-2.5 text-right font-mono">${currency}${it.unitPrice}</td>
+          <td class="p-2.5 text-right font-mono text-emerald-700">${it.discountAmount > 0 ? `-${currency}${it.discountAmount}` : '-'}</td>
+          <td class="p-2.5 text-right font-mono font-bold text-neutral-900">${currency}${it.total}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('receiptSubtotal').textContent = `${currency}${invoice.subtotal.toLocaleString()}`;
+      document.getElementById('receiptTotalDiscount').textContent = invoice.totalDiscount > 0 ? `-${currency}${invoice.totalDiscount.toLocaleString()}` : `${currency}0`;
+      document.getElementById('receiptFinalTotal').textContent = `${currency}${invoice.finalTotal.toLocaleString()}`;
+
+      const termsEl = document.getElementById('receiptTermsContent');
+      if (termsEl) termsEl.textContent = state.settings.termsAndConditions || '';
+
+      document.getElementById('receiptFooterPolicy').textContent = state.settings.customFooter || '';
+      document.getElementById('receiptStoreContact').textContent = `Store Contact: ${state.settings.storeWhatsapp || state.settings.storePhone || ''}`;
+
+      document.getElementById('receiptModal').classList.remove('hidden');
+      safeCreateIcons();
+    }
+
+    function closeReceiptModal() {
+      document.getElementById('receiptModal').classList.add('hidden');
+      state.activeReceiptInvoice = null;
+    }
+
+    function printReceipt() {
+      window.print();
+    }
+
+    function copyReceiptText() {
+      if (!state.activeReceiptInvoice) return;
+      const text = formatWhatsAppInvoiceMessage(state.activeReceiptInvoice, state.settings);
+      navigator.clipboard.writeText(text).then(() => showToast('Receipt copied', 'success'));
+    }
+
+    function resendCurrentReceiptWhatsApp() {
+      if (!state.activeReceiptInvoice) return;
+      const msg = formatWhatsAppInvoiceMessage(state.activeReceiptInvoice, state.settings);
+      openWhatsAppUrl(state.activeReceiptInvoice.customerWhatsapp, state.activeReceiptInvoice.countryCode, msg);
+    }
+
+    function startNewBillFromModal() {
+      closeReceiptModal();
+      resetBillForm();
+      switchTab('billing');
+    }
+
+    function setInvoiceFilter(filter) {
+      state.invoiceFilter = filter;
+      ['All', 'Online', 'Offline', 'Payment Pending'].forEach(f => {
+        const btn = document.getElementById(f === 'All' ? 'filterAll' : f === 'Online' ? 'filterOnline' : f === 'Offline' ? 'filterOffline' : 'filterPending');
+        if (btn) {
+          btn.className = f === filter ? 'px-2.5 sm:px-3 py-1.5 rounded-lg bg-white text-neutral-900 shadow-xs flex-1 sm:flex-none text-center cursor-pointer' : 'px-2.5 sm:px-3 py-1.5 rounded-lg text-neutral-600 hover:text-neutral-900 flex-1 sm:flex-none text-center cursor-pointer';
+        }
+      });
+      renderInvoicesList();
+    }
+
+    // Render Invoices with highly visible, functional Action Buttons
+    function renderInvoicesList() {
+      const tbody = document.getElementById('invoicesTableBody');
+      const search = (document.getElementById('invoiceSearchInput').value || '').toLowerCase().trim();
+      const currency = state.settings.currency || '\u20B9';
+
+      const totalRev = state.invoices.reduce((sum, inv) => sum + (inv.status === 'paid' ? inv.finalTotal : 0), 0);
+      const totalDisc = state.invoices.reduce((sum, inv) => sum + (inv.totalDiscount || 0), 0);
+      const paidCount = state.invoices.filter(inv => inv.status === 'paid').length;
+      const pendingCount = state.invoices.filter(inv => inv.status === 'pending').length;
+
+      document.getElementById('statTotalRevenue').textContent = `${currency}${totalRev.toLocaleString()}`;
+      document.getElementById('statTotalDiscount').textContent = `${currency}${totalDisc.toLocaleString()}`;
+      document.getElementById('statPaidCount').textContent = paidCount;
+      document.getElementById('statPendingCount').textContent = pendingCount;
+
+      let filtered = state.invoices.filter(inv => {
+        if (state.invoiceFilter !== 'All' && inv.paymentMode !== state.invoiceFilter) return false;
+        if (search) {
+          return (inv.customerName || '').toLowerCase().includes(search) || (inv.customerWhatsapp || '').includes(search) || (inv.invoiceNo || '').toLowerCase().includes(search);
+        }
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="text-center py-12 text-neutral-400 text-xs">
+              <i data-lucide="receipt" class="w-8 h-8 mx-auto mb-2 opacity-40"></i>
+              <p class="font-bold text-neutral-600">No Invoices Found</p>
+              <p class="mt-0.5">Generate a bill from the New Bill tab to see it here.</p>
+            </td>
+          </tr>
+        `;
+        safeCreateIcons();
+        return;
+      }
+
+      tbody.innerHTML = '';
+      filtered.forEach(inv => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-neutral-50/80 transition border-b border-neutral-100 last:border-0';
+
+        const paymentBadge = inv.paymentMode === 'Online'
+          ? '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-neutral-900 text-white">Online</span>'
+          : inv.paymentMode === 'Offline'
+            ? '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-700 text-white">Offline</span>'
+            : '<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500 text-white">Pending</span>';
+
+        tr.innerHTML = `
+          <td class="py-3.5 px-4 font-mono font-bold text-neutral-900">${inv.invoiceNo}</td>
+          <td class="py-3.5 px-4 text-neutral-600 whitespace-nowrap text-xs">${inv.formattedDate}</td>
+          <td class="py-3.5 px-4">
+            <div class="font-bold text-neutral-900">${escapeHtml(inv.customerName)}</div>
+            <div class="text-[11px] text-neutral-500 font-mono">${inv.countryCode} ${inv.customerWhatsapp}</div>
+          </td>
+          <td class="py-3.5 px-4 text-neutral-600 text-xs">
+            ${inv.items.length} item${inv.items.length > 1 ? 's' : ''} (${inv.items.reduce((sum, it) => sum + it.qty, 0)} pcs)
+          </td>
+          <td class="py-3.5 px-4">
+            <button onclick="togglePaymentStatus('${inv.id}')" title="Click to toggle status" class="cursor-pointer">
+              ${paymentBadge}
+            </button>
+          </td>
+          <td class="py-3.5 px-4 text-right font-mono text-emerald-700 font-semibold">${inv.totalDiscount > 0 ? `-${currency}${inv.totalDiscount.toLocaleString()}` : '-'}</td>
+          <td class="py-3.5 px-4 text-right font-mono font-bold text-neutral-900 text-sm">${currency}${inv.finalTotal.toLocaleString()}</td>
+          <td class="py-3.5 px-4 text-center whitespace-nowrap min-w-[210px]">
+            <div class="flex items-center justify-center gap-1.5 flex-wrap">
+              <!-- WhatsApp Resend Button -->
+              <button type="button" onclick="resendInvoiceWhatsApp('${inv.id}')" title="Send WhatsApp Bill to ${escapeHtml(inv.customerName)}" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold flex items-center gap-1 transition cursor-pointer shadow-2xs">
+                <i data-lucide="send" class="w-3.5 h-3.5 text-white"></i>
+                <span>WhatsApp</span>
+              </button>
+              <!-- View / Print Bill Button -->
+              <button type="button" onclick="viewInvoiceDetails('${inv.id}')" title="View, Print & Download Invoice Receipt" class="px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 active:scale-95 text-white text-xs font-bold flex items-center gap-1 transition cursor-pointer shadow-2xs">
+                <i data-lucide="eye" class="w-3.5 h-3.5 text-white"></i>
+                <span>View</span>
+              </button>
+              <!-- Delete Button -->
+              <button type="button" onclick="openDeleteInvoiceModal('${inv.id}')" title="Delete Invoice Record" class="px-2 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold transition cursor-pointer flex items-center gap-1 shadow-2xs">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                <span class="sr-only sm:not-sr-only">Del</span>
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      safeCreateIcons();
+    }
+
+    function resendInvoiceWhatsApp(invoiceId) {
+      const inv = state.invoices.find(i => i.id === invoiceId);
+      if (!inv) return;
+      const msg = formatWhatsAppInvoiceMessage(inv, state.settings);
+      openWhatsAppUrl(inv.customerWhatsapp, inv.countryCode, msg);
+    }
+
+    function viewInvoiceDetails(invoiceId) {
+      const inv = state.invoices.find(i => i.id === invoiceId);
+      if (!inv) return;
+      openReceiptModal(inv);
+    }
+
+    function togglePaymentStatus(invoiceId) {
+      const inv = state.invoices.find(i => i.id === invoiceId);
+      if (!inv) return;
+      inv.paymentMode = inv.paymentMode === 'Payment Pending' ? 'Online' : 'Payment Pending';
+      inv.status = inv.paymentMode === 'Payment Pending' ? 'pending' : 'paid';
+      saveToStorage('simmple_invoices', state.invoices);
+      renderInvoicesList();
+      showToast(`Updated status to ${inv.paymentMode}`, 'info');
+    }
+
+    function openDeleteInvoiceModal(invoiceId) {
+      const inv = state.invoices.find(i => i.id === invoiceId);
+      if (!inv) return;
+      state.pendingDelete = { type: 'invoice', id: invoiceId, invoiceNo: inv.invoiceNo };
+      document.getElementById('deleteModalTitle').textContent = `Delete Invoice ${inv.invoiceNo}?`;
+      document.getElementById('deleteModalContent').innerHTML = `
+        <div class="text-neutral-700">Customer: <b>${escapeHtml(inv.customerName)}</b></div>
+        <div class="text-neutral-500">Amount: <b>${state.settings.currency || '\u20B9'}${inv.finalTotal}</b></div>
+      `;
+      document.getElementById('deleteConfirmModal').classList.remove('hidden');
+      safeCreateIcons();
+    }
+
+    function openClearAllInvoicesModal() {
+      if (state.invoices.length === 0) return;
+      state.pendingDelete = { type: 'all_invoices' };
+      document.getElementById('deleteModalTitle').textContent = `Clear All Invoices?`;
+      document.getElementById('deleteModalContent').innerHTML = `
+        <div class="text-red-600 font-semibold">Permanently wipe all ${state.invoices.length} invoices from device?</div>
+      `;
+      document.getElementById('deleteConfirmModal').classList.remove('hidden');
+      safeCreateIcons();
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('deleteConfirmModal').classList.add('hidden');
+      state.pendingDelete = null;
+    }
+
+    function executeDeleteAction() {
+      if (!state.pendingDelete) return;
+      if (state.pendingDelete.type === 'invoice') {
+        state.invoices = state.invoices.filter(inv => inv.id !== state.pendingDelete.id);
+        saveToStorage('simmple_invoices', state.invoices);
+        updateInvoiceCounters();
+        renderInvoicesList();
+        showToast('Invoice deleted', 'info');
+      } else if (state.pendingDelete.type === 'all_invoices') {
+        state.invoices = [];
+        saveToStorage('simmple_invoices', []);
+        updateInvoiceCounters();
+        renderInvoicesList();
+        showToast('All invoices cleared', 'info');
+      }
+      closeDeleteModal();
+    }
+
+    function exportInvoicesCSV() {
+      if (state.invoices.length === 0) {
+        showToast('No invoices to export', 'error');
+        return;
+      }
+      const headers = ['Invoice No', 'Date', 'Customer Name', 'Customer Phone', 'Payment Mode', 'Items Count', 'Sub Total', 'Discount Given', 'Final Total'];
+      const rows = state.invoices.map(inv => [
+        inv.invoiceNo,
+        `"${inv.formattedDate}"`,
+        `"${inv.customerName}"`,
+        `"${inv.countryCode} ${inv.customerWhatsapp}"`,
+        inv.paymentMode,
+        inv.items.reduce((s, it) => s + it.qty, 0),
+        inv.subtotal,
+        inv.totalDiscount,
+        inv.finalTotal
+      ]);
+      const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const link = document.createElement('a');
+      link.setAttribute('href', encodeURI(csvContent));
+      link.setAttribute('download', `Invoices_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function updateActiveFieldsBadge() {
+      const f = state.settings.billFields || DEFAULT_BILL_FIELDS;
+      const allKeys = Object.keys(DEFAULT_BILL_FIELDS);
+      const activeCount = allKeys.filter(k => f[k] !== false).length;
+      const badge = document.getElementById('activeFieldsBadge');
+      if (badge) {
+        badge.textContent = `${activeCount} / ${allKeys.length} Active`;
+        badge.className = activeCount === allKeys.length
+          ? 'text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-mono'
+          : activeCount > 5
+            ? 'text-xs font-bold px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-800 font-mono'
+            : 'text-xs font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 font-mono';
+      }
+    }
+
+    function onBillFieldToggle(fieldKey, isChecked) {
+      if (!state.settings.billFields) state.settings.billFields = { ...DEFAULT_BILL_FIELDS };
+      state.settings.billFields[fieldKey] = isChecked;
+      saveToStorage('simmple_settings', state.settings);
+      updateActiveFieldsBadge();
+      updateSimulatedWhatsAppPreview();
+    }
+
+    function onBillTermsInput(val) {
+      state.settings.termsAndConditions = val;
+      const countEl = document.getElementById('termsCharCount');
+      if (countEl) countEl.textContent = `${val.length} characters`;
+      updateSimulatedWhatsAppPreview();
+    }
+
+    function insertTermsTemplate(type) {
+      let t = '';
+      if (type === 'apparel') {
+        t = '1. Goods once sold can be exchanged within 7 days in original unworn condition with tags attached.\n2. Original tax invoice is required for all exchanges.\n3. No cash refunds; exchange or store credit provided.\n4. Altered, washed, or discounted items cannot be returned.';
+      } else if (type === 'norefund') {
+        t = '1. All sales are final. Strictly no returns, cancellations, or refunds.\n2. Items must be inspected upon delivery / receipt.\n3. Defects must be reported within 24 hours with unboxing proof.';
+      } else if (type === 'minimal') {
+        t = 'Thank you for your business! Please keep this invoice for warranty and support.';
+      }
+      const el = document.getElementById('adminBillTerms');
+      if (el) {
+        el.value = t;
+        onBillTermsInput(t);
+        showToast('Template inserted', 'info');
+      }
+    }
+
+    function setBillTemplatePreset(preset) {
+      if (!state.settings.billFields) state.settings.billFields = { ...DEFAULT_BILL_FIELDS };
+      const allKeys = Object.keys(DEFAULT_BILL_FIELDS);
+
+      if (preset === 'all') {
+        allKeys.forEach(k => state.settings.billFields[k] = true);
+      } else if (preset === 'compact') {
+        allKeys.forEach(k => state.settings.billFields[k] = false);
+        state.settings.billFields.storeHeader = true;
+        state.settings.billFields.invoiceNo = true;
+        state.settings.billFields.customerName = true;
+        state.settings.billFields.itemsList = true;
+        state.settings.billFields.itemPricing = true;
+        state.settings.billFields.finalTotal = true;
+        state.settings.billFields.storeContact = true;
+      } else if (preset === 'standard') {
+        state.settings.billFields = { ...DEFAULT_BILL_FIELDS };
+      }
+
+      saveToStorage('simmple_settings', state.settings);
+      populateBillFieldsCheckboxes();
+      updateActiveFieldsBadge();
+      updateSimulatedWhatsAppPreview();
+      showToast(`Applied ${preset} preset`, 'success');
+    }
+
+    function populateBillFieldsCheckboxes() {
+      const f = state.settings.billFields || DEFAULT_BILL_FIELDS;
+      Object.keys(DEFAULT_BILL_FIELDS).forEach(k => {
+        const el = document.getElementById('chk_' + k);
+        if (el) el.checked = f[k] !== false;
+      });
+      const termsInput = document.getElementById('adminBillTerms');
+      if (termsInput) {
+        termsInput.value = state.settings.termsAndConditions || '';
+        const countEl = document.getElementById('termsCharCount');
+        if (countEl) countEl.textContent = `${(state.settings.termsAndConditions || '').length} characters`;
+      }
+    }
+
+    function updateSimulatedWhatsAppPreview() {
+      const simStoreName = document.getElementById('previewSimStoreName');
+      if (simStoreName) simStoreName.textContent = state.settings.storeName || 'Simmple Store';
+
+      const demoInvoice = {
+        invoiceNo: (state.settings.invoicePrefix || 'SMP-') + '2026-0001',
+        formattedDate: '31 Aug 2026, 04:30 PM',
+        customerName: 'Aarav Sharma',
+        customerWhatsapp: '9876543210',
+        countryCode: '+91',
+        paymentMode: 'Online',
+        items: [
+          { productName: 'Simmple Oversized Tee', color: 'Jet Black', qty: 2, unitPrice: 899, discountAmount: 100, total: 1698 },
+          { productName: 'Pleated Straight Trouser', color: 'Oat Khaki', qty: 1, unitPrice: 1899, discountAmount: 0, total: 1899 }
+        ],
+        subtotal: 3697,
+        totalDiscount: 100,
+        finalTotal: 3597
+      };
+
+      const simContainer = document.getElementById('simulatedWhatsappText');
+      if (simContainer) {
+        simContainer.textContent = formatWhatsAppInvoiceMessage(demoInvoice, state.settings);
+      }
+    }
+
+    function populateAdminFields() {
+      const s = state.settings;
+      document.getElementById('adminStoreWhatsapp').value = s.storeWhatsapp || '';
+      document.getElementById('adminStorePhone').value = s.storePhone || '';
+      document.getElementById('adminStoreUpi').value = s.upiId || '';
+      document.getElementById('adminStoreEmail').value = s.storeEmail || '';
+      document.getElementById('adminStoreName').value = s.storeName || '';
+      document.getElementById('adminStoreTagline').value = s.tagline || '';
+      document.getElementById('adminStoreAddress').value = s.storeAddress || '';
+      document.getElementById('adminStoreCurrency').value = s.currency || '\u20B9';
+      document.getElementById('adminStorePrefix').value = s.invoicePrefix || 'SMP-';
+      document.getElementById('adminStoreNextInv').value = s.nextInvoiceNumber || 1;
+      document.getElementById('adminStoreFooter').value = s.customFooter || '';
+      document.getElementById('adminOwnerPin').value = s.ownerPin || '1234';
+
+      populateBillFieldsCheckboxes();
+      updateActiveFieldsBadge();
+      updateSimulatedWhatsAppPreview();
+      renderAdminProductsList();
+    }
+
+    function saveAdminSettings() {
+      state.settings.storeWhatsapp = document.getElementById('adminStoreWhatsapp').value.trim();
+      state.settings.storePhone = document.getElementById('adminStorePhone').value.trim();
+      state.settings.upiId = document.getElementById('adminStoreUpi').value.trim();
+      state.settings.storeEmail = document.getElementById('adminStoreEmail').value.trim();
+      state.settings.storeName = document.getElementById('adminStoreName').value.trim() || 'Simmple';
+      state.settings.tagline = document.getElementById('adminStoreTagline').value.trim();
+      state.settings.storeAddress = document.getElementById('adminStoreAddress').value.trim();
+      state.settings.currency = document.getElementById('adminStoreCurrency').value.trim() || '\u20B9';
+      state.settings.invoicePrefix = document.getElementById('adminStorePrefix').value.trim() || 'SMP-';
+      state.settings.nextInvoiceNumber = parseInt(document.getElementById('adminStoreNextInv').value) || 1;
+      state.settings.customFooter = document.getElementById('adminStoreFooter').value.trim();
+      state.settings.ownerPin = document.getElementById('adminOwnerPin').value.trim() || '1234';
+
+      const termsInput = document.getElementById('adminBillTerms');
+      if (termsInput) state.settings.termsAndConditions = termsInput.value.trim();
+
+      saveToStorage('simmple_settings', state.settings);
+
+      document.getElementById('navStoreName').textContent = state.settings.storeName;
+      document.getElementById('navTagline').textContent = state.settings.tagline;
+      document.getElementById('navStoreWhatsappText').textContent = state.settings.storeWhatsapp || state.settings.storePhone;
+
+      updateSimulatedWhatsAppPreview();
+      updateInvoiceCounters();
+      populateProductSelect();
+      showToast('Settings saved', 'success');
+    }
+
+    function renderAdminProductsList() {
+      const container = document.getElementById('adminProductList');
+      const badge = document.getElementById('adminProductCountBadge');
+      if (badge) badge.textContent = `${state.products.length} Products`;
+      if (!container) return;
+
+      const currency = state.settings.currency || '\u20B9';
+      container.innerHTML = '';
+
+      state.products.forEach(prod => {
+        const div = document.createElement('div');
+        div.className = 'p-3 rounded-xl border border-neutral-200 bg-neutral-50/70 flex items-center justify-between text-xs gap-2';
+        div.innerHTML = `
+          <div class="min-w-0 flex-1">
+            <div class="font-bold text-neutral-900 truncate">${escapeHtml(prod.name)}</div>
+            <div class="text-neutral-500 font-mono text-[11px]">${currency}${prod.price} &bull; ${escapeHtml(prod.sku)} &bull; ${prod.inStock ? '<span class="text-emerald-700 font-semibold">In Stock</span>' : '<span class="text-neutral-400 font-semibold">Out of Stock</span>'}</div>
+          </div>
+          <div class="flex items-center gap-1">
+            <button onclick="editProduct('${prod.id}')" class="px-2 py-1 rounded bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-[10px] font-bold cursor-pointer transition" title="Edit Product">
+              Edit
+            </button>
+            <button onclick="toggleProductStock('${prod.id}')" class="px-2 py-1 rounded bg-neutral-200 hover:bg-neutral-300 text-neutral-700 text-[10px] font-bold cursor-pointer transition">
+              ${prod.inStock ? 'In Stock' : 'Out'}
+            </button>
+            <button onclick="deleteProduct('${prod.id}')" class="p-1 text-red-500 hover:bg-red-50 rounded cursor-pointer transition" title="Delete Product">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+      safeCreateIcons();
+    }
+
+    function editProduct(prodId) {
+      const prod = state.products.find(p => p.id === prodId);
+      if (!prod) return;
+      document.getElementById('editingProductId').value = prod.id;
+      document.getElementById('newProdName').value = prod.name;
+      document.getElementById('newProdSku').value = prod.sku;
+      document.getElementById('newProdCategory').value = prod.category;
+      document.getElementById('newProdPrice').value = prod.price;
+      document.getElementById('newProdColors').value = (prod.colors || []).join(', ');
+      document.getElementById('newProdInStock').value = prod.inStock ? 'true' : 'false';
+
+      document.getElementById('adminFormTitle').textContent = 'Edit Product';
+      document.getElementById('adminSaveProdBtnText').textContent = 'Update Product';
+      document.getElementById('adminCancelEditBtn').classList.remove('hidden');
+      document.getElementById('adminProductFormBox').classList.add('ring-2', 'ring-neutral-900');
+      document.getElementById('newProdName').focus();
+    }
+
+    function cancelProductEditing() {
+      document.getElementById('editingProductId').value = '';
+      document.getElementById('newProdName').value = '';
+      document.getElementById('newProdSku').value = '';
+      document.getElementById('newProdCategory').value = '';
+      document.getElementById('newProdPrice').value = '';
+      document.getElementById('newProdColors').value = '';
+      document.getElementById('newProdInStock').value = 'true';
+
+      document.getElementById('adminFormTitle').textContent = 'Add New Product';
+      document.getElementById('adminSaveProdBtnText').textContent = 'Add to Catalog';
+      document.getElementById('adminCancelEditBtn').classList.add('hidden');
+      document.getElementById('adminProductFormBox').classList.remove('ring-2', 'ring-neutral-900');
+    }
+
+    function saveProductFromAdminForm() {
+      const editingId = document.getElementById('editingProductId').value.trim();
+      const name = document.getElementById('newProdName').value.trim();
+      const sku = document.getElementById('newProdSku').value.trim();
+      const category = document.getElementById('newProdCategory').value.trim();
+      const price = parseFloat(document.getElementById('newProdPrice').value) || 0;
+      const colorsRaw = document.getElementById('newProdColors').value.trim();
+      const inStock = document.getElementById('newProdInStock').value === 'true';
+
+      if (!name || price <= 0) {
+        showToast('Please enter valid product name & price', 'error');
+        return;
+      }
+
+      const colors = colorsRaw ? colorsRaw.split(',').map(c => c.trim()).filter(Boolean) : ['Standard'];
+
+      if (editingId) {
+        const idx = state.products.findIndex(p => p.id === editingId);
+        if (idx !== -1) {
+          state.products[idx] = {
+            ...state.products[idx],
+            name,
+            sku: sku || state.products[idx].sku,
+            category: category || 'General',
+            price,
+            colors: colors.length > 0 ? colors : ['Standard'],
+            inStock
+          };
+          showToast('Product updated', 'success');
+        }
+        cancelProductEditing();
+      } else {
+        state.products.unshift({
+          id: 'prod-' + Date.now(),
+          name: name,
+          sku: sku || `SMP-${Date.now().toString().slice(-4)}`,
+          category: category || 'General',
+          price: price,
+          colors: colors.length > 0 ? colors : ['Standard'],
+          inStock: inStock
+        });
+        document.getElementById('newProdName').value = '';
+        document.getElementById('newProdSku').value = '';
+        document.getElementById('newProdPrice').value = '';
+        document.getElementById('newProdColors').value = '';
+        showToast('Product added to catalog', 'success');
+      }
+
+      saveToStorage('simmple_products', state.products);
+      renderAdminProductsList();
+      populateProductSelect();
+    }
+
+    function toggleProductStock(prodId) {
+      const p = state.products.find(x => x.id === prodId);
+      if (!p) return;
+      p.inStock = !p.inStock;
+      saveToStorage('simmple_products', state.products);
+      renderAdminProductsList();
+      populateProductSelect();
+    }
+
+    function deleteProduct(prodId) {
+      state.products = state.products.filter(p => p.id !== prodId);
+      saveToStorage('simmple_products', state.products);
+      renderAdminProductsList();
+      populateProductSelect();
+      showToast('Product deleted', 'info');
+    }
+
+    function resetAllDemoData() {
+      localStorage.clear();
+      state.settings = { ...DEFAULT_STORE_SETTINGS };
+      state.products = [...INITIAL_PRODUCTS];
+      state.invoices = [];
+      saveToStorage('simmple_settings', state.settings);
+      saveToStorage('simmple_products', state.products);
+      saveToStorage('simmple_invoices', state.invoices);
+      initBillingPOS();
+      populateAdminFields();
+      renderInvoicesList();
+      showToast('Store reset to defaults', 'info');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      checkAuthOnLoad();
+      initBillingPOS();
+      document.getElementById('navStoreName').textContent = state.settings.storeName;
+      document.getElementById('navTagline').textContent = state.settings.tagline;
+      document.getElementById('navStoreWhatsappText').textContent = state.settings.storeWhatsapp || state.settings.storePhone;
+      const cleanPhone = sanitizePhone(state.settings.storeWhatsapp || state.settings.storePhone, '+91');
+      const waLink = document.getElementById('navWhatsappLink');
+      if (waLink) waLink.href = `https://wa.me/${cleanPhone}`;
+      safeCreateIcons();
+    });
+  </script>
+</body>
+</html>
